@@ -20,8 +20,6 @@ import PageHeading from '../../components/atoms/PageHeading';
 import ProductFormSkeleton from './ProductFormSkeleton';
 import RichTextEditor from '../../components/molecules/RichTextEditor';
 import { ROUTES } from '../../constants/routes';
-import { useTestingMode } from '../../context/TestingModeContext';
-import useMockProducts from '../../hooks/useMockProducts';
 import useCategories from '../../hooks/useCategories';
 import imageUrl from '../../utils/imageUrl';
 import {
@@ -38,33 +36,26 @@ const isContentEmpty = (html) => !html || !html.replace(/<[^>]*>/g, '').trim();
 
 export default function ProductFormPage() {
     const { id } = useParams();
-    const { testingMode } = useTestingMode();
-    // Remounts (resetting all local state) whenever the id or testing mode
-    // changes, instead of syncing that reset through an effect.
-    return <ProductFormPageInner key={`${id}-${testingMode}`} id={id} testingMode={testingMode} />;
+    // Remounts (resetting all local state) whenever the id changes, instead
+    // of syncing that reset through an effect.
+    return <ProductFormPageInner key={id} id={id} />;
 }
 
-function ProductFormPageInner({ id, testingMode }) {
+function ProductFormPageInner({ id }) {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [mockProducts, setMockProducts] = useMockProducts();
     const { categories } = useCategories();
     const activeCategories = categories.filter((c) => c.status === 'active');
 
     const isEdit = Boolean(id);
-    const mockProduct = isEdit ? mockProducts.find((p) => String(p.id) === String(id)) : null;
 
-    const [product, setProduct] = useState(testingMode ? mockProduct : null);
-    const [loading, setLoading] = useState(isEdit && !testingMode);
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(isEdit);
     const [saving, setSaving] = useState(false);
-    const [notFound, setNotFound] = useState(isEdit && testingMode && !mockProduct);
+    const [notFound, setNotFound] = useState(false);
 
     const [files, setFiles] = useState([]);
-    // In testing mode the product is already known synchronously, so this
-    // seeds correctly on first render; in real mode it starts empty and gets
-    // filled once the fetch below resolves.
-    const [keptImages, setKeptImages] = useState(testingMode ? (mockProduct?.images ?? []) : []);
-    const urlValue = Form.useWatch('image', form);
+    const [keptImages, setKeptImages] = useState([]);
     const priceValue = Form.useWatch('price', form);
     const discountValue = Form.useWatch('discountPercent', form);
     const finalPriceValue =
@@ -73,7 +64,7 @@ function ProductFormPageInner({ id, testingMode }) {
             : priceValue;
 
     useEffect(() => {
-        if (!isEdit || testingMode) return;
+        if (!isEdit) return;
         let cancelled = false;
         fetchProduct(id)
             .then((data) => {
@@ -91,7 +82,7 @@ function ProductFormPageInner({ id, testingMode }) {
         return () => {
             cancelled = true;
         };
-    }, [id, isEdit, testingMode, form]);
+    }, [id, isEdit, form]);
 
     if (notFound) {
         return (
@@ -108,21 +99,6 @@ function ProductFormPageInner({ id, testingMode }) {
     }
 
     const handleFinish = async (values) => {
-        if (testingMode) {
-            if (isEdit) {
-                setMockProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, ...values } : p)));
-                message.success('Product updated');
-            } else {
-                setMockProducts((prev) => [
-                    { ...values, id: Math.max(...prev.map((p) => p.id), 0) + 1, rating: 0, reviews: 0 },
-                    ...prev,
-                ]);
-                message.success('Product created');
-            }
-            navigate(ROUTES.PRODUCTS);
-            return;
-        }
-
         setSaving(true);
         try {
             const payload = {
@@ -168,7 +144,6 @@ function ProductFormPageInner({ id, testingMode }) {
                     discountPercent: 0,
                     nutritionFacts: [],
                     variants: [],
-                    ...(testingMode && product ? product : {}),
                 }}
             >
                 <Row gutter={24}>
@@ -317,80 +292,61 @@ function ProductFormPageInner({ id, testingMode }) {
 
                     <Col xs={24} lg={10}>
                         <Card title="Images" className="mb-6">
-                            {!testingMode ? (
-                                <>
-                                    {keptImages.length > 0 && (
-                                        <div className="mb-4">
-                                            <div className="text-sm text-gray-500 mb-2">Current Images</div>
-                                            <div className="flex flex-wrap gap-2">
-                                                {keptImages.map((src) => (
-                                                    <div key={src} className="relative">
-                                                        <Image
-                                                            src={imageUrl(src)}
-                                                            width={72}
-                                                            height={72}
-                                                            className="rounded-lg object-cover"
-                                                        />
-                                                        <Button
-                                                            size="small"
-                                                            danger
-                                                            type="text"
-                                                            className="absolute -top-2 -right-2 bg-white shadow"
-                                                            onClick={() =>
-                                                                setKeptImages((prev) => prev.filter((s) => s !== src))
-                                                            }
-                                                        >
-                                                            ✕
-                                                        </Button>
-                                                    </div>
-                                                ))}
+                            {keptImages.length > 0 && (
+                                <div className="mb-4">
+                                    <div className="text-sm text-gray-500 mb-2">Current Images</div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {keptImages.map((src) => (
+                                            <div key={src} className="relative">
+                                                <Image
+                                                    src={imageUrl(src)}
+                                                    width={72}
+                                                    height={72}
+                                                    className="rounded-lg object-cover"
+                                                />
+                                                <Button
+                                                    size="small"
+                                                    danger
+                                                    type="text"
+                                                    className="absolute -top-2 -right-2 bg-white shadow"
+                                                    onClick={() =>
+                                                        setKeptImages((prev) => prev.filter((s) => s !== src))
+                                                    }
+                                                >
+                                                    ✕
+                                                </Button>
                                             </div>
-                                        </div>
-                                    )}
-
-                                    <Form.Item
-                                        label="Add Images (max 6)"
-                                        tooltip="Crop to a square (1:1) — this is exactly how it will appear on the storefront."
-                                    >
-                                        <ImgCrop aspect={1} rotationSlider quality={1}>
-                                            <Upload
-                                                listType="picture-card"
-                                                fileList={files}
-                                                // No `beforeUpload={() => false}` here: returning `false` makes
-                                                // AntD discard the cropped file and fall back to the original,
-                                                // uncropped one. customRequest no-ops the network call instead,
-                                                // so the cropped file still flows into fileList untouched.
-                                                customRequest={({ onSuccess }) => onSuccess?.('ok')}
-                                                onChange={({ fileList }) => setFiles(fileList.slice(0, 6))}
-                                                accept="image/*"
-                                                multiple
-                                            >
-                                                {files.length >= 6 ? null : (
-                                                    <div>
-                                                        <PlusOutlined />
-                                                        <div className="mt-1 text-xs">Upload</div>
-                                                    </div>
-                                                )}
-                                            </Upload>
-                                        </ImgCrop>
-                                    </Form.Item>
-                                </>
-                            ) : (
-                                <>
-                                    <Form.Item name="image" label="Image URL">
-                                        <Input placeholder="https://..." />
-                                    </Form.Item>
-                                    {urlValue && (
-                                        <Image
-                                            src={urlValue}
-                                            width={120}
-                                            height={120}
-                                            className="rounded-lg object-cover"
-                                            fallback=""
-                                        />
-                                    )}
-                                </>
+                                        ))}
+                                    </div>
+                                </div>
                             )}
+
+                            <Form.Item
+                                label="Add Images (max 6)"
+                                tooltip="Crop to a square (1:1) — this is exactly how it will appear on the storefront."
+                            >
+                                <ImgCrop aspect={1} rotationSlider quality={1}>
+                                    <Upload
+                                        listType="picture-card"
+                                        fileList={files}
+                                        // No `beforeUpload={() => false}` here: returning `false` makes
+                                        // AntD discard the cropped file and fall back to the original,
+                                        // uncropped one. customRequest no-ops the network call instead,
+                                        // so the cropped file still flows into fileList untouched.
+                                        customRequest={({ onSuccess }) => onSuccess?.('ok')}
+                                        onChange={({ fileList }) => setFiles(fileList.slice(0, 6))}
+                                        accept="image/*"
+                                        multiple
+                                    >
+                                        {files.length >= 6 ? null : (
+                                            <div>
+                                                <PlusOutlined />
+                                                <div className="mt-1 text-xs">Upload</div>
+                                            </div>
+                                        )}
+                                    </Upload>
+                                </ImgCrop>
+                            </Form.Item>
                         </Card>
 
                         <Card

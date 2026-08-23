@@ -5,10 +5,7 @@ import PageHeading from '../../components/atoms/PageHeading';
 import SearchBar from '../../components/molecules/SearchBar';
 import RowActions from '../../components/molecules/RowActions';
 import DataTable from '../../components/organisms/DataTable';
-import useTableQuery from '../../hooks/useTableQuery';
 import useServerTableQuery from '../../hooks/useServerTableQuery';
-import { useTestingMode } from '../../context/TestingModeContext';
-import { careerApplications as initialApplications } from '../../data/careerApplications';
 import {
     fetchCareerApplications,
     deleteCareerApplication as deleteCareerApplicationApi,
@@ -17,30 +14,16 @@ import {
 const apiError = (err, fallback) => err?.response?.data?.message || fallback;
 
 export default function CareerApplicationManagementPage() {
-    const { testingMode } = useTestingMode();
-    return <CareerApplicationManagementPageInner key={testingMode} testingMode={testingMode} />;
-}
+    const serverQuery = useServerTableQuery(fetchCareerApplications);
 
-function CareerApplicationManagementPageInner({ testingMode }) {
-    const [mockApplications, setMockApplications] = useState(initialApplications);
-    const clientQuery = useTableQuery(mockApplications, {
-        searchKeys: ['name', 'email', 'phone', 'referralName', 'referralEmail'],
-    });
-    const serverQuery = useServerTableQuery(fetchCareerApplications, { enabled: !testingMode });
-
-    const applications = testingMode ? clientQuery.filteredData : serverQuery.items;
-    const searchText = testingMode ? clientQuery.searchText : serverQuery.searchInput;
-    const setSearchText = testingMode ? clientQuery.setSearchText : serverQuery.setSearchInput;
-    const loading = !testingMode && serverQuery.loading;
+    const applications = serverQuery.items;
+    const searchText = serverQuery.searchInput;
+    const setSearchText = serverQuery.setSearchInput;
+    const loading = serverQuery.loading;
 
     const [viewing, setViewing] = useState(null);
 
     const handleDelete = async (id) => {
-        if (testingMode) {
-            setMockApplications((prev) => prev.filter((a) => a.id !== id));
-            message.success('Application removed');
-            return;
-        }
         try {
             await deleteCareerApplicationApi(id);
             serverQuery.refetch();
@@ -51,7 +34,7 @@ function CareerApplicationManagementPageInner({ testingMode }) {
     };
 
     const columns = [
-        { title: 'Applicant', dataIndex: 'name', sorter: testingMode ? (a, b) => a.name.localeCompare(b.name) : undefined },
+        { title: 'Applicant', dataIndex: 'name' },
         { title: 'Email', dataIndex: 'email' },
         { title: 'Phone', dataIndex: 'phone' },
         { title: 'Job', dataIndex: 'career', render: (career) => career?.title ?? '—' },
@@ -63,7 +46,6 @@ function CareerApplicationManagementPageInner({ testingMode }) {
         {
             title: 'Applied On',
             dataIndex: 'createdAt',
-            sorter: testingMode ? (a, b) => String(a.createdAt ?? '').localeCompare(String(b.createdAt ?? '')) : undefined,
             render: (date) => (date ? new Date(date).toLocaleDateString() : '—'),
         },
         {
@@ -89,8 +71,8 @@ function CareerApplicationManagementPageInner({ testingMode }) {
                 columns={columns}
                 data={applications}
                 loading={loading}
-                pagination={testingMode ? undefined : { ...serverQuery.pagination, total: serverQuery.total }}
-                onChange={testingMode ? undefined : serverQuery.handleTableChange}
+                pagination={{ ...serverQuery.pagination, total: serverQuery.total }}
+                onChange={serverQuery.handleTableChange}
             />
 
             <Modal

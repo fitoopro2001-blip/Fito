@@ -8,10 +8,7 @@ import RowActions from '../../components/molecules/RowActions';
 import StatusTag from '../../components/atoms/StatusTag';
 import DataTable from '../../components/organisms/DataTable';
 import CareerFormDrawer from '../../components/organisms/careers/CareerFormDrawer';
-import useTableQuery from '../../hooks/useTableQuery';
 import useServerTableQuery from '../../hooks/useServerTableQuery';
-import { useTestingMode } from '../../context/TestingModeContext';
-import { careers as initialCareers } from '../../data/careers';
 import {
     fetchCareers,
     createCareer as createCareerApi,
@@ -22,19 +19,12 @@ import {
 const apiError = (err, fallback) => err?.response?.data?.message || fallback;
 
 export default function CareerManagementPage() {
-    const { testingMode } = useTestingMode();
-    return <CareerManagementPageInner key={testingMode} testingMode={testingMode} />;
-}
+    const serverQuery = useServerTableQuery(fetchCareers);
 
-function CareerManagementPageInner({ testingMode }) {
-    const [mockCareers, setMockCareers] = useState(initialCareers);
-    const clientQuery = useTableQuery(mockCareers, { searchKeys: ['title', 'description'] });
-    const serverQuery = useServerTableQuery(fetchCareers, { enabled: !testingMode });
-
-    const careers = testingMode ? clientQuery.filteredData : serverQuery.items;
-    const searchText = testingMode ? clientQuery.searchText : serverQuery.searchInput;
-    const setSearchText = testingMode ? clientQuery.setSearchText : serverQuery.setSearchInput;
-    const loading = !testingMode && serverQuery.loading;
+    const careers = serverQuery.items;
+    const searchText = serverQuery.searchInput;
+    const setSearchText = serverQuery.setSearchInput;
+    const loading = serverQuery.loading;
     const [saving, setSaving] = useState(false);
 
     const [viewing, setViewing] = useState(null);
@@ -52,24 +42,6 @@ function CareerManagementPageInner({ testingMode }) {
     };
 
     const handleSubmit = async (values) => {
-        if (testingMode) {
-            if (editingCareer) {
-                setMockCareers((prev) =>
-                    prev.map((c) => (c.id === editingCareer.id ? { ...c, ...values } : c))
-                );
-                message.success('Job posting updated');
-            } else {
-                const newCareer = {
-                    ...values,
-                    id: Math.max(...mockCareers.map((c) => c.id), 0) + 1,
-                };
-                setMockCareers((prev) => [newCareer, ...prev]);
-                message.success('Job posting created');
-            }
-            setDrawerOpen(false);
-            return;
-        }
-
         setSaving(true);
         try {
             if (editingCareer) {
@@ -89,11 +61,6 @@ function CareerManagementPageInner({ testingMode }) {
     };
 
     const handleDelete = async (id) => {
-        if (testingMode) {
-            setMockCareers((prev) => prev.filter((c) => c.id !== id));
-            message.success('Job posting deleted');
-            return;
-        }
         try {
             await deleteCareerApi(id);
             serverQuery.refetch();
@@ -104,7 +71,7 @@ function CareerManagementPageInner({ testingMode }) {
     };
 
     const columns = [
-        { title: 'Title', dataIndex: 'title', sorter: testingMode ? (a, b) => a.title.localeCompare(b.title) : undefined },
+        { title: 'Title', dataIndex: 'title' },
         { title: 'Description', dataIndex: 'description', ellipsis: true },
         { title: 'Contact Email', dataIndex: 'email' },
         {
@@ -114,7 +81,6 @@ function CareerManagementPageInner({ testingMode }) {
                 { text: 'Open', value: true },
                 { text: 'Closed', value: false },
             ],
-            onFilter: testingMode ? (value, record) => record.isOpen === value : undefined,
             render: (isOpen) => <StatusTag status={isOpen ? 'open' : 'closed'} />,
         },
         {
@@ -149,8 +115,8 @@ function CareerManagementPageInner({ testingMode }) {
                 columns={columns}
                 data={careers}
                 loading={loading}
-                pagination={testingMode ? undefined : { ...serverQuery.pagination, total: serverQuery.total }}
-                onChange={testingMode ? undefined : serverQuery.handleTableChange}
+                pagination={{ ...serverQuery.pagination, total: serverQuery.total }}
+                onChange={serverQuery.handleTableChange}
             />
 
             <Modal

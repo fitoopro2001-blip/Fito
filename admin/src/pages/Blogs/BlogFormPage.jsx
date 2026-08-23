@@ -7,8 +7,6 @@ import PageHeading from '../../components/atoms/PageHeading';
 import RichTextEditor from '../../components/molecules/RichTextEditor';
 import BlogFormSkeleton from './BlogFormSkeleton';
 import { ROUTES } from '../../constants/routes';
-import { useTestingMode } from '../../context/TestingModeContext';
-import useMockBlogs from '../../hooks/useMockBlogs';
 import { BLOG_CATEGORIES } from '../../data/blogs';
 import imageUrl from '../../utils/imageUrl';
 import { fetchBlog, createBlog as createBlogApi, updateBlog as updateBlogApi } from '../../api/adminBlogs.api';
@@ -19,31 +17,27 @@ const isContentEmpty = (html) => !html || !html.replace(/<[^>]*>/g, '').trim();
 
 export default function BlogFormPage() {
     const { id } = useParams();
-    const { testingMode } = useTestingMode();
-    // Remounts (resetting all local state) whenever the id or testing mode
-    // changes, instead of syncing that reset through an effect.
-    return <BlogFormPageInner key={`${id}-${testingMode}`} id={id} testingMode={testingMode} />;
+    // Remounts (resetting all local state) whenever the id changes, instead
+    // of syncing that reset through an effect.
+    return <BlogFormPageInner key={id} id={id} />;
 }
 
-function BlogFormPageInner({ id, testingMode }) {
+function BlogFormPageInner({ id }) {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [mockBlogs, setMockBlogs] = useMockBlogs();
 
     const isEdit = Boolean(id);
-    const mockBlog = isEdit ? mockBlogs.find((b) => String(b.id) === String(id)) : null;
 
-    const [blog, setBlog] = useState(testingMode ? mockBlog : null);
-    const [loading, setLoading] = useState(isEdit && !testingMode);
+    const [blog, setBlog] = useState(null);
+    const [loading, setLoading] = useState(isEdit);
     const [saving, setSaving] = useState(false);
-    const [notFound, setNotFound] = useState(isEdit && testingMode && !mockBlog);
+    const [notFound, setNotFound] = useState(false);
 
     const [file, setFile] = useState(null);
-    const [currentImage, setCurrentImage] = useState(testingMode ? mockBlog?.image : null);
-    const urlValue = Form.useWatch('image', form);
+    const [currentImage, setCurrentImage] = useState(null);
 
     useEffect(() => {
-        if (!isEdit || testingMode) return;
+        if (!isEdit) return;
         let cancelled = false;
         fetchBlog(id)
             .then((data) => {
@@ -61,7 +55,7 @@ function BlogFormPageInner({ id, testingMode }) {
         return () => {
             cancelled = true;
         };
-    }, [id, isEdit, testingMode, form]);
+    }, [id, isEdit, form]);
 
     if (notFound) {
         return (
@@ -78,25 +72,6 @@ function BlogFormPageInner({ id, testingMode }) {
     }
 
     const handleFinish = async (values) => {
-        if (testingMode) {
-            if (isEdit) {
-                setMockBlogs((prev) => prev.map((b) => (b.id === blog.id ? { ...b, ...values } : b)));
-                message.success('Blog updated');
-            } else {
-                setMockBlogs((prev) => [
-                    {
-                        ...values,
-                        id: Math.max(...prev.map((b) => b.id), 0) + 1,
-                        slug: values.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-                    },
-                    ...prev,
-                ]);
-                message.success('Blog created');
-            }
-            navigate(ROUTES.BLOGS);
-            return;
-        }
-
         setSaving(true);
         try {
             const payload = { ...values, image: file?.originFileObj };
@@ -130,12 +105,7 @@ function BlogFormPageInner({ id, testingMode }) {
             {loading ? (
                 <BlogFormSkeleton />
             ) : (
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleFinish}
-                    initialValues={testingMode && blog ? blog : {}}
-                >
+                <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={{}}>
                     <Row gutter={24}>
                         <Col xs={24} lg={14}>
                             <Card title="Post Details" className="mb-6">
@@ -194,62 +164,43 @@ function BlogFormPageInner({ id, testingMode }) {
 
                         <Col xs={24} lg={10}>
                             <Card title="Cover Image" className="mb-6">
-                                {!testingMode ? (
-                                    <>
-                                        {currentImage && !file && (
-                                            <div className="mb-4">
-                                                <div className="text-sm text-gray-500 mb-2">Current Cover</div>
-                                                <Image
-                                                    src={imageUrl(currentImage)}
-                                                    width={120}
-                                                    height={90}
-                                                    className="rounded-lg object-cover"
-                                                    fallback=""
-                                                />
-                                            </div>
-                                        )}
-                                        <Form.Item
-                                            label="Upload"
-                                            tooltip="Crop to 16:10 — this is exactly how it will appear on the blog."
-                                        >
-                                            <ImgCrop aspect={16 / 10} rotationSlider quality={1}>
-                                                <Upload
-                                                    listType="picture-card"
-                                                    fileList={file ? [file] : []}
-                                                    // See ProductFormPage: beforeUpload={() => false} would make
-                                                    // AntD drop the cropped file and keep the original instead.
-                                                    customRequest={({ onSuccess }) => onSuccess?.('ok')}
-                                                    onChange={({ fileList }) => setFile(fileList[fileList.length - 1] ?? null)}
-                                                    onRemove={() => setFile(null)}
-                                                    accept="image/*"
-                                                    maxCount={1}
-                                                >
-                                                    {file ? null : (
-                                                        <div>
-                                                            <PlusOutlined />
-                                                            <div className="mt-1 text-xs">Upload</div>
-                                                        </div>
-                                                    )}
-                                                </Upload>
-                                            </ImgCrop>
-                                        </Form.Item>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Form.Item name="image" label="Image URL">
-                                            <Input placeholder="https://..." />
-                                        </Form.Item>
-                                        {urlValue && (
-                                            <Image
-                                                src={urlValue}
-                                                width={120}
-                                                height={120}
-                                                className="rounded-lg object-cover"
-                                                fallback=""
-                                            />
-                                        )}
-                                    </>
+                                {currentImage && !file && (
+                                    <div className="mb-4">
+                                        <div className="text-sm text-gray-500 mb-2">Current Cover</div>
+                                        <Image
+                                            src={imageUrl(currentImage)}
+                                            width={120}
+                                            height={90}
+                                            className="rounded-lg object-cover"
+                                            fallback=""
+                                        />
+                                    </div>
                                 )}
+                                <Form.Item
+                                    label="Upload"
+                                    tooltip="Crop to 16:10 — this is exactly how it will appear on the blog."
+                                >
+                                    <ImgCrop aspect={16 / 10} rotationSlider quality={1}>
+                                        <Upload
+                                            listType="picture-card"
+                                            fileList={file ? [file] : []}
+                                            // See ProductFormPage: beforeUpload={() => false} would make
+                                            // AntD drop the cropped file and keep the original instead.
+                                            customRequest={({ onSuccess }) => onSuccess?.('ok')}
+                                            onChange={({ fileList }) => setFile(fileList[fileList.length - 1] ?? null)}
+                                            onRemove={() => setFile(null)}
+                                            accept="image/*"
+                                            maxCount={1}
+                                        >
+                                            {file ? null : (
+                                                <div>
+                                                    <PlusOutlined />
+                                                    <div className="mt-1 text-xs">Upload</div>
+                                                </div>
+                                            )}
+                                        </Upload>
+                                    </ImgCrop>
+                                </Form.Item>
                             </Card>
                         </Col>
                     </Row>

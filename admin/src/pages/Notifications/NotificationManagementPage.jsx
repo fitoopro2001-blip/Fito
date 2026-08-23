@@ -8,14 +8,8 @@ import RowActions from '../../components/molecules/RowActions';
 import StatusTag from '../../components/atoms/StatusTag';
 import DataTable from '../../components/organisms/DataTable';
 import NotificationFormDrawer from '../../components/organisms/notifications/NotificationFormDrawer';
-import useTableQuery from '../../hooks/useTableQuery';
 import useServerTableQuery from '../../hooks/useServerTableQuery';
-import { useTestingMode } from '../../context/TestingModeContext';
-import {
-    notifications as initialNotifications,
-    NOTIFICATION_TYPES,
-    NOTIFICATION_AUDIENCES,
-} from '../../data/notifications';
+import { NOTIFICATION_TYPES, NOTIFICATION_AUDIENCES } from '../../data/notifications';
 import {
     fetchNotifications,
     createNotification as createNotificationApi,
@@ -28,19 +22,12 @@ const audienceLabel = (value) => NOTIFICATION_AUDIENCES.find((a) => a.value === 
 const apiError = (err, fallback) => err?.response?.data?.message || fallback;
 
 export default function NotificationManagementPage() {
-    const { testingMode } = useTestingMode();
-    return <NotificationManagementPageInner key={testingMode} testingMode={testingMode} />;
-}
+    const serverQuery = useServerTableQuery(fetchNotifications);
 
-function NotificationManagementPageInner({ testingMode }) {
-    const [mockNotifications, setMockNotifications] = useState(initialNotifications);
-    const clientQuery = useTableQuery(mockNotifications, { searchKeys: ['title', 'message'] });
-    const serverQuery = useServerTableQuery(fetchNotifications, { enabled: !testingMode });
-
-    const notifications = testingMode ? clientQuery.filteredData : serverQuery.items;
-    const searchText = testingMode ? clientQuery.searchText : serverQuery.searchInput;
-    const setSearchText = testingMode ? clientQuery.setSearchText : serverQuery.setSearchInput;
-    const loading = !testingMode && serverQuery.loading;
+    const notifications = serverQuery.items;
+    const searchText = serverQuery.searchInput;
+    const setSearchText = serverQuery.setSearchInput;
+    const loading = serverQuery.loading;
     const [saving, setSaving] = useState(false);
 
     const [viewing, setViewing] = useState(null);
@@ -58,24 +45,6 @@ function NotificationManagementPageInner({ testingMode }) {
     };
 
     const handleSubmit = async (values) => {
-        if (testingMode) {
-            if (editingNotification) {
-                setMockNotifications((prev) =>
-                    prev.map((n) => (n.id === editingNotification.id ? { ...n, ...values } : n))
-                );
-                message.success('Notification updated');
-            } else {
-                const newNotification = {
-                    ...values,
-                    id: Math.max(...mockNotifications.map((n) => n.id), 0) + 1,
-                };
-                setMockNotifications((prev) => [newNotification, ...prev]);
-                message.success('Notification created');
-            }
-            setDrawerOpen(false);
-            return;
-        }
-
         setSaving(true);
         try {
             if (editingNotification) {
@@ -95,11 +64,6 @@ function NotificationManagementPageInner({ testingMode }) {
     };
 
     const handleDelete = async (id) => {
-        if (testingMode) {
-            setMockNotifications((prev) => prev.filter((n) => n.id !== id));
-            message.success('Notification deleted');
-            return;
-        }
         try {
             await deleteNotificationApi(id);
             serverQuery.refetch();
@@ -110,14 +74,13 @@ function NotificationManagementPageInner({ testingMode }) {
     };
 
     const columns = [
-        { title: 'Title', dataIndex: 'title', sorter: testingMode ? (a, b) => a.title.localeCompare(b.title) : undefined },
+        { title: 'Title', dataIndex: 'title' },
         { title: 'Message', dataIndex: 'message', ellipsis: true },
         {
             title: 'Type',
             dataIndex: 'type',
             filters: NOTIFICATION_TYPES.map((t) => ({ text: t.label, value: t.value })),
-            filteredValue: testingMode ? undefined : [serverQuery.filters.type].filter(Boolean),
-            onFilter: testingMode ? (value, record) => record.type === value : undefined,
+            filteredValue: [serverQuery.filters.type].filter(Boolean),
             render: (type) => <StatusTag status={type} />,
         },
         {
@@ -133,14 +96,12 @@ function NotificationManagementPageInner({ testingMode }) {
                 { text: 'Scheduled', value: 'scheduled' },
                 { text: 'Draft', value: 'draft' },
             ],
-            filteredValue: testingMode ? undefined : [serverQuery.filters.status].filter(Boolean),
-            onFilter: testingMode ? (value, record) => record.status === value : undefined,
+            filteredValue: [serverQuery.filters.status].filter(Boolean),
             render: (status) => <StatusTag status={status} />,
         },
         {
             title: 'Date',
             dataIndex: 'date',
-            sorter: testingMode ? (a, b) => String(a.date ?? '').localeCompare(String(b.date ?? '')) : undefined,
         },
         {
             title: 'Actions',
@@ -174,8 +135,8 @@ function NotificationManagementPageInner({ testingMode }) {
                 columns={columns}
                 data={notifications}
                 loading={loading}
-                pagination={testingMode ? undefined : { ...serverQuery.pagination, total: serverQuery.total }}
-                onChange={testingMode ? undefined : serverQuery.handleTableChange}
+                pagination={{ ...serverQuery.pagination, total: serverQuery.total }}
+                onChange={serverQuery.handleTableChange}
             />
 
             <Modal

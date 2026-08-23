@@ -7,31 +7,20 @@ import SearchBar from '../../components/molecules/SearchBar';
 import RowActions from '../../components/molecules/RowActions';
 import StatusTag from '../../components/atoms/StatusTag';
 import DataTable from '../../components/organisms/DataTable';
-import useTableQuery from '../../hooks/useTableQuery';
 import useServerTableQuery from '../../hooks/useServerTableQuery';
-import { orders as initialOrders, ORDER_STATUSES, PAYMENT_METHODS } from '../../data/orders';
-import { useTestingMode } from '../../context/TestingModeContext';
+import { ORDER_STATUSES, PAYMENT_METHODS } from '../../data/orders';
 import { fetchOrders, updateOrderStatus as updateOrderStatusApi } from '../../api/adminOrders.api';
 
 const paymentLabel = (value) => PAYMENT_METHODS.find((p) => p.value === value)?.label ?? value;
 const capitalize = (value) => value.charAt(0).toUpperCase() + value.slice(1);
 
 export default function OrderManagementPage() {
-    const { testingMode } = useTestingMode();
-    // Remounts (resetting all local state) whenever testing mode is toggled,
-    // instead of syncing that reset through an effect.
-    return <OrderManagementPageInner key={testingMode} testingMode={testingMode} />;
-}
+    const serverQuery = useServerTableQuery(fetchOrders);
 
-function OrderManagementPageInner({ testingMode }) {
-    const [mockOrders, setMockOrders] = useState(initialOrders);
-    const clientQuery = useTableQuery(mockOrders, { searchKeys: ['id', 'transactionId'] });
-    const serverQuery = useServerTableQuery(fetchOrders, { enabled: !testingMode });
-
-    const orders = testingMode ? clientQuery.filteredData : serverQuery.items;
-    const searchText = testingMode ? clientQuery.searchText : serverQuery.searchInput;
-    const setSearchText = testingMode ? clientQuery.setSearchText : serverQuery.setSearchInput;
-    const loading = !testingMode && serverQuery.loading;
+    const orders = serverQuery.items;
+    const searchText = serverQuery.searchInput;
+    const setSearchText = serverQuery.setSearchInput;
+    const loading = serverQuery.loading;
 
     const [viewing, setViewing] = useState(null);
     const [statusEditing, setStatusEditing] = useState(null);
@@ -48,15 +37,6 @@ function OrderManagementPageInner({ testingMode }) {
     }, [highlightOrderId, loading]);
 
     const handleStatusChange = async (status) => {
-        if (testingMode) {
-            setMockOrders((prev) =>
-                prev.map((o) => (o.id === statusEditing.id ? { ...o, status } : o))
-            );
-            message.success('Order status updated');
-            setStatusEditing(null);
-            return;
-        }
-
         try {
             await updateOrderStatusApi(statusEditing.id, status);
             serverQuery.refetch();
@@ -65,11 +45,6 @@ function OrderManagementPageInner({ testingMode }) {
         } catch {
             message.error('Failed to update order status');
         }
-    };
-
-    const handleDelete = (id) => {
-        setMockOrders((prev) => prev.filter((o) => o.id !== id));
-        message.success('Order deleted');
     };
 
     const columns = [
@@ -84,7 +59,6 @@ function OrderManagementPageInner({ testingMode }) {
         {
             title: 'Total',
             dataIndex: 'total',
-            sorter: testingMode ? (a, b) => a.total - b.total : undefined,
             render: (total) => `Rs. ${total.toFixed(2)}`,
         },
         {
@@ -95,26 +69,20 @@ function OrderManagementPageInner({ testingMode }) {
         {
             title: 'Placed At',
             dataIndex: 'placedAt',
-            sorter: testingMode ? (a, b) => a.placedAt.localeCompare(b.placedAt) : undefined,
             render: (date) => new Date(date).toLocaleDateString(),
         },
         {
             title: 'Status',
             dataIndex: 'status',
             filters: ORDER_STATUSES.map((s) => ({ text: capitalize(s), value: s })),
-            filteredValue: testingMode ? undefined : [serverQuery.filters.status].filter(Boolean),
-            onFilter: testingMode ? (value, record) => record.status === value : undefined,
+            filteredValue: [serverQuery.filters.status].filter(Boolean),
             render: (status) => <StatusTag status={status} />,
         },
         {
             title: 'Actions',
             key: 'actions',
             render: (_, record) => (
-                <RowActions
-                    onView={() => setViewing(record)}
-                    onEdit={() => setStatusEditing(record)}
-                    onDelete={testingMode ? () => handleDelete(record.id) : undefined}
-                />
+                <RowActions onView={() => setViewing(record)} onEdit={() => setStatusEditing(record)} />
             ),
         },
     ];
@@ -138,8 +106,8 @@ function OrderManagementPageInner({ testingMode }) {
                 data={orders}
                 loading={loading}
                 rowClassName={(record) => (record.id === highlightOrderId ? 'row-highlight' : '')}
-                pagination={testingMode ? undefined : { ...serverQuery.pagination, total: serverQuery.total }}
-                onChange={testingMode ? undefined : serverQuery.handleTableChange}
+                pagination={{ ...serverQuery.pagination, total: serverQuery.total }}
+                onChange={serverQuery.handleTableChange}
             />
 
             <Modal open={!!viewing} title="Order Details" onCancel={() => setViewing(null)} footer={null} width={560}>

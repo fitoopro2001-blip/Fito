@@ -9,7 +9,6 @@ import {
     ResponsiveContainer,
     CartesianGrid,
 } from 'recharts';
-import { salesLast7Days, salesLast30Days, salesLast12Months } from '../../data/analytics';
 import { fetchSalesAnalytics } from '../../api/adminDashboard.api';
 import { BRAND } from '../../constants/theme';
 
@@ -19,14 +18,11 @@ const RANGE_TABS = [
     { key: '12m', label: 'Last 12 Months' },
 ];
 
-const STATIC_DATA = { '7d': salesLast7Days, '30d': salesLast30Days, '12m': salesLast12Months };
-
-export default function SalesChart({ testingMode }) {
-    const [salesData, setSalesData] = useState(testingMode ? STATIC_DATA : {});
-    const [loading, setLoading] = useState(!testingMode);
+export default function SalesChart() {
+    const [salesData, setSalesData] = useState({});
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (testingMode) return undefined;
         let cancelled = false;
         Promise.all(RANGE_TABS.map((r) => fetchSalesAnalytics(r.key)))
             .then((results) => {
@@ -39,7 +35,7 @@ export default function SalesChart({ testingMode }) {
         return () => {
             cancelled = true;
         };
-    }, [testingMode]);
+    }, []);
 
     return (
         <Card className="rounded-2xl border border-gray-100 shadow-sm" title="Sales Overview">

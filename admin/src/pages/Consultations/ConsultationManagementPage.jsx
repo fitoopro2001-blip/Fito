@@ -4,21 +4,10 @@ import { DollarOutlined } from '@ant-design/icons';
 import PageHeading from '../../components/atoms/PageHeading';
 import ConsultationTable from '../../components/organisms/consultations/ConsultationTable';
 import { CONSULTATION_GOALS } from '../../constants/consultationGoals';
-import { consultationsByGoal } from '../../data/consultations';
 import { consultationPricingPath } from '../../constants/routes';
-import { useTestingMode } from '../../context/TestingModeContext';
 
 export default function ConsultationManagementPage() {
-    const { testingMode } = useTestingMode();
-    // Remounts (resetting all local state) whenever testing mode is toggled,
-    // instead of syncing that reset through an effect.
-    return <ConsultationManagementPageInner key={testingMode} testingMode={testingMode} />;
-}
-
-function ConsultationManagementPageInner({ testingMode }) {
     const navigate = useNavigate();
-    const byGoal = (goalId) => (testingMode ? consultationsByGoal[goalId] ?? [] : []);
-    const allConsultations = testingMode ? Object.values(consultationsByGoal).flat() : [];
 
     return (
         <div>
@@ -32,9 +21,7 @@ function ConsultationManagementPageInner({ testingMode }) {
                     {
                         key: 'all',
                         label: <span>🗂 All</span>,
-                        children: (
-                            <ConsultationTable initialData={allConsultations} testingMode={testingMode} showGoal />
-                        ),
+                        children: <ConsultationTable showGoal />,
                     },
                     ...CONSULTATION_GOALS.map((goal) => ({
                         key: goal.id,
@@ -50,11 +37,7 @@ function ConsultationManagementPageInner({ testingMode }) {
                                         Manage Pricing
                                     </Button>
                                 </div>
-                                <ConsultationTable
-                                    initialData={byGoal(goal.id)}
-                                    testingMode={testingMode}
-                                    goal={goal.id}
-                                />
+                                <ConsultationTable goal={goal.id} />
                             </div>
                         ),
                     })),

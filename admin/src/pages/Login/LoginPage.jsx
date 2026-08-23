@@ -4,14 +4,11 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useTestingMode } from '../../context/TestingModeContext';
-import TestingModeToggle from '../../components/atoms/TestingModeToggle';
 import { ROUTES } from '../../constants/routes';
 import logo from '../../assets/logo/fitoo-logo.svg';
 
 export default function LoginPage() {
     const { login } = useAuth();
-    const { testingMode } = useTestingMode();
     const navigate = useNavigate();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -37,10 +34,6 @@ export default function LoginPage() {
                     'radial-gradient(circle at 50% 0%, var(--color-primary-light) 0%, var(--color-page) 55%)',
             }}
         >
-            <div className="fixed top-4 right-4">
-                <TestingModeToggle />
-            </div>
-
             <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -59,29 +52,22 @@ export default function LoginPage() {
 
                     {error && <Alert type="error" message={error} className="mb-4" showIcon />}
 
-                    <Form
-                        layout="vertical"
-                        onFinish={onFinish}
-                        initialValues={
-                            testingMode ? { email: 'super@Fito.com', password: 'password' } : undefined
-                        }
-                    >
+                    <Form layout="vertical" onFinish={onFinish}>
                         <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Email is required' }]}>
                             <Input size="large" prefix={<UserOutlined className="text-gray-400" />} placeholder="you@Fito.com" />
                         </Form.Item>
                         <Form.Item name="password" label="Password" rules={[{ required: true, message: 'Password is required' }]}>
                             <Input.Password size="large" prefix={<LockOutlined className="text-gray-400" />} placeholder="••••••••" />
                         </Form.Item>
+                        <div className="flex justify-end mb-2">
+                            <Link to={ROUTES.FORGOT_PASSWORD} className="text-sm text-primary font-medium">
+                                Forgot password?
+                            </Link>
+                        </div>
                         <Button type="primary" size="large" htmlType="submit" block loading={loading} className="mt-2">
                             Sign In
                         </Button>
                     </Form>
-
-                    {testingMode && (
-                        <p className="text-xs text-gray-400 text-center mt-6">
-                            Demo: super@Fito.com / admin@Fito.com — password: password
-                        </p>
-                    )}
 
                     <p className="text-sm text-gray-500 text-center mt-6">
                         Need an account?{' '}

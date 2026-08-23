@@ -216,6 +216,8 @@ export const toPublicReferralCommission = (commission) => ({
         email: commission.referredUser.email,
         joinedAt: commission.referredUser.createdAt,
     },
+    consultationBooked: commission.consultationBooked,
+    productBought: commission.productBought,
     status: commission.status,
     amount: commission.amount,
     proofScreenshot: commission.proofScreenshot,

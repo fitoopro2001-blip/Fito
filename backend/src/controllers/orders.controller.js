@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import asyncHandler from '../utils/asyncHandler.js';
 import Order from '../models/Order.model.js';
+import ReferralCommission from '../models/ReferralCommission.model.js';
 import { toPublicOrder } from '../utils/serializers.js';
 import { sendOrderConfirmationEmail } from '../utils/mailer.util.js';
 
@@ -35,6 +36,27 @@ export const createOrder = asyncHandler(async (req, res) => {
         screenshotAttached,
         shipping,
     });
+
+    // First order from a referred, logged-in user creates (or updates) their
+    // (single) commission record — mirrors the consultation-booked trigger in
+    // consultations.controller.js. Guest checkouts (no req.user) have no
+    // referredBy to check against, so they're simply skipped. triggeringOrder
+    // is backfilled separately (only if unset) rather than via $setOnInsert,
+    // since the consultation-triggered path may have created this doc first.
+    if (req.user?.referredBy) {
+        await ReferralCommission.updateOne(
+            { referredUser: req.user._id },
+            {
+                $set: { productBought: true },
+                $setOnInsert: { referrer: req.user.referredBy, referredUser: req.user._id },
+            },
+            { upsert: true }
+        );
+        await ReferralCommission.updateOne(
+            { referredUser: req.user._id, triggeringOrder: { $exists: false } },
+            { $set: { triggeringOrder: order._id } }
+        );
+    }
 
     // Best-effort — email is optional at checkout, and a delivery failure
     // shouldn't fail an order that's already been placed.

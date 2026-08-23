@@ -8,8 +8,6 @@ import StatusTag from '../../components/atoms/StatusTag';
 import DataTable from '../../components/organisms/DataTable';
 import CategoryFormDrawer from '../../components/organisms/categories/CategoryFormDrawer';
 import useTableQuery from '../../hooks/useTableQuery';
-import useMockCategories from '../../hooks/useMockCategories';
-import { useTestingMode } from '../../context/TestingModeContext';
 import {
     fetchCategories,
     createCategory as createCategoryApi,
@@ -20,14 +18,8 @@ import {
 const apiError = (err, fallback) => err?.response?.data?.message || fallback;
 
 export default function CategoryManagementPage() {
-    const { testingMode } = useTestingMode();
-    return <CategoryManagementPageInner key={testingMode} testingMode={testingMode} />;
-}
-
-function CategoryManagementPageInner({ testingMode }) {
-    const [mockCategories, setMockCategories] = useMockCategories();
     const [apiCategories, setApiCategories] = useState([]);
-    const [loading, setLoading] = useState(!testingMode);
+    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
     const loadCategories = () => {
@@ -39,12 +31,10 @@ function CategoryManagementPageInner({ testingMode }) {
     };
 
     useEffect(() => {
-        if (testingMode) return;
         loadCategories();
-    }, [testingMode]);
+    }, []);
 
-    const categories = testingMode ? mockCategories : apiCategories;
-    const clientQuery = useTableQuery(categories, { searchKeys: ['name', 'slug'] });
+    const clientQuery = useTableQuery(apiCategories, { searchKeys: ['name', 'slug'] });
 
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
@@ -60,32 +50,6 @@ function CategoryManagementPageInner({ testingMode }) {
     };
 
     const handleSubmit = async (values) => {
-        if (testingMode) {
-            if (editingCategory) {
-                setMockCategories((prev) =>
-                    prev.map((c) => (c.id === editingCategory.id ? { ...c, ...values } : c))
-                );
-                message.success('Category updated');
-            } else {
-                const slug = values.name
-                    .toLowerCase()
-                    .trim()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-+|-+$/g, '');
-                if (mockCategories.some((c) => c.slug === slug)) {
-                    message.error('A category with this name already exists');
-                    return;
-                }
-                setMockCategories((prev) => [
-                    { ...values, id: Math.max(...prev.map((c) => c.id), 0) + 1, slug, productCount: 0 },
-                    ...prev,
-                ]);
-                message.success('Category created');
-            }
-            setDrawerOpen(false);
-            return;
-        }
-
         setSaving(true);
         try {
             if (editingCategory) {
@@ -105,15 +69,6 @@ function CategoryManagementPageInner({ testingMode }) {
     };
 
     const handleDelete = async (category) => {
-        if (testingMode) {
-            if (category.productCount > 0) {
-                message.error(`Cannot delete — ${category.productCount} product(s) still use this category`);
-                return;
-            }
-            setMockCategories((prev) => prev.filter((c) => c.id !== category.id));
-            message.success('Category deleted');
-            return;
-        }
         try {
             await deleteCategoryApi(category.id);
             loadCategories();

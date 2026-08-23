@@ -19,34 +19,11 @@ import SummaryCard from '../../components/molecules/SummaryCard';
 import SalesChart from '../../components/organisms/SalesChart';
 import RecentListCard from '../../components/organisms/RecentListCard';
 import StatusTag from '../../components/atoms/StatusTag';
-import { dashboardSummary } from '../../data/analytics';
-import { appUsers } from '../../data/appUsers';
-import { recentOrders as staticRecentOrders } from '../../data/orders';
-import { reviews as staticReviews } from '../../data/reviews';
-import { products as mockProducts } from '../../data/products';
-import { consultationsByGoal } from '../../data/consultations';
 import { BRAND } from '../../constants/theme';
 import { ROUTES, consultationDetailPath } from '../../constants/routes';
-import { useTestingMode } from '../../context/TestingModeContext';
 import { fetchDashboardSummary } from '../../api/adminDashboard.api';
 import { useAuth } from '../../context/AuthContext';
 import imageUrl from '../../utils/imageUrl';
-
-// Mock data has no real sales figures, so "best selling" is approximated by
-// review count — good enough for testing-mode illustration only.
-const mockBestSelling = () =>
-    [...mockProducts]
-        .sort((a, b) => (b.reviews ?? 0) - (a.reviews ?? 0))
-        .slice(0, 5)
-        .map((p) => ({ ...p, unitsSold: p.reviews ?? 0 }));
-
-const mockOutOfStock = () => mockProducts.filter((p) => p.stock <= 0).slice(0, 5);
-
-const mockRecentConsultations = () =>
-    Object.values(consultationsByGoal)
-        .flat()
-        .sort((a, b) => (b.submittedAt ?? '').localeCompare(a.submittedAt ?? ''))
-        .slice(0, 5);
 
 const EMPTY_SUMMARY = {
     totalUsers: 0,
@@ -59,8 +36,6 @@ const EMPTY_SUMMARY = {
     totalSales: 0,
 };
 
-// Real orders (toPublicOrder) and mock orders (data/orders.js) use different
-// field names for the same values, so the list reads from either shape.
 const orderCustomer = (order) => order.customer ?? order.shipping?.name ?? '—';
 const orderAmount = (order) => order.amount ?? order.total ?? 0;
 const orderDate = (order) => order.date ?? order.placedAt;
@@ -68,24 +43,18 @@ const orderDate = (order) => order.date ?? order.placedAt;
 // A small coordinated palette (similar saturation/lightness) instead of
 // arbitrary hues, so the stat row reads as one designed set.
 export default function DashboardPage() {
-    const { testingMode } = useTestingMode();
-    return <DashboardPageInner key={testingMode} testingMode={testingMode} />;
-}
-
-function DashboardPageInner({ testingMode }) {
     const navigate = useNavigate();
     const { isSuperAdmin } = useAuth();
-    const [summary, setSummary] = useState(testingMode ? dashboardSummary : EMPTY_SUMMARY);
-    const [recentUsers, setRecentUsers] = useState(testingMode ? appUsers.slice(0, 5) : []);
-    const [recentOrders, setRecentOrders] = useState(testingMode ? staticRecentOrders : []);
-    const [recentReviews, setRecentReviews] = useState(testingMode ? staticReviews.slice(0, 5) : []);
-    const [bestSellingProducts, setBestSellingProducts] = useState(testingMode ? mockBestSelling() : []);
-    const [outOfStockProducts, setOutOfStockProducts] = useState(testingMode ? mockOutOfStock() : []);
-    const [recentConsultations, setRecentConsultations] = useState(testingMode ? mockRecentConsultations() : []);
-    const [loading, setLoading] = useState(!testingMode);
+    const [summary, setSummary] = useState(EMPTY_SUMMARY);
+    const [recentUsers, setRecentUsers] = useState([]);
+    const [recentOrders, setRecentOrders] = useState([]);
+    const [recentReviews, setRecentReviews] = useState([]);
+    const [bestSellingProducts, setBestSellingProducts] = useState([]);
+    const [outOfStockProducts, setOutOfStockProducts] = useState([]);
+    const [recentConsultations, setRecentConsultations] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (testingMode) return undefined;
         let cancelled = false;
         fetchDashboardSummary()
             .then((data) => {
@@ -107,7 +76,7 @@ function DashboardPageInner({ testingMode }) {
         return () => {
             cancelled = true;
         };
-    }, [testingMode]);
+    }, []);
 
     const cards = [
         { icon: <TeamOutlined />, label: 'Total Users', value: summary.totalUsers.toLocaleString(), accent: BRAND.primary },
@@ -135,7 +104,7 @@ function DashboardPageInner({ testingMode }) {
             <Row gutter={[16, 16]}>
                 {isSuperAdmin && (
                     <Col xs={24} lg={16}>
-                        <SalesChart testingMode={testingMode} />
+                        <SalesChart />
                     </Col>
                 )}
                 <Col xs={24} lg={isSuperAdmin ? 8 : 24}>

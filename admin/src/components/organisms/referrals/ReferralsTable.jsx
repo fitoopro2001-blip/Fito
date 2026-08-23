@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Descriptions, Form, Select, InputNumber, Input, Upload, Image, message } from 'antd';
+import { Descriptions, Form, Select, InputNumber, Input, Upload, Image, Tag, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import PageHeading from '../../atoms/PageHeading';
 import SearchBar from '../../molecules/SearchBar';
@@ -7,10 +7,7 @@ import RowActions from '../../molecules/RowActions';
 import StatusTag from '../../atoms/StatusTag';
 import Modal from '../../atoms/AppModal';
 import DataTable from '../DataTable';
-import useTableQuery from '../../../hooks/useTableQuery';
 import useServerTableQuery from '../../../hooks/useServerTableQuery';
-import { referralCommissions as initialReferralCommissions } from '../../../data/referrals';
-import { useTestingMode } from '../../../context/TestingModeContext';
 import { fetchReferralCommissions, updateReferralCommission } from '../../../api/adminReferrals.api';
 import imageUrl from '../../../utils/imageUrl';
 
@@ -21,12 +18,9 @@ const STATUS_OPTIONS = [
 
 const apiError = (err, fallback) => err?.response?.data?.message || fallback;
 
-export default function ReferralsTable() {
-    const { testingMode } = useTestingMode();
-    // Remounts (resetting all local state) whenever testing mode is toggled,
-    // instead of syncing that reset through an effect.
-    return <ReferralsTableInner key={testingMode} testingMode={testingMode} />;
-}
+const BooleanTag = ({ value }) => (
+    <Tag color={value ? 'green' : 'default'}>{value ? 'Yes' : 'No'}</Tag>
+);
 
 const toRow = (r) => ({
     ...r,
@@ -37,20 +31,15 @@ const toRow = (r) => ({
     joinedDate: r.referredUser?.joinedAt?.slice(0, 10),
 });
 
-function ReferralsTableInner({ testingMode }) {
-    const [mockReferrals, setMockReferrals] = useState(initialReferralCommissions.map(toRow));
-    const clientQuery = useTableQuery(mockReferrals, {
-        searchKeys: ['referrerName', 'referrerEmail', 'referredName', 'referredEmail'],
-    });
-    const serverQuery = useServerTableQuery(
-        (params) => fetchReferralCommissions(params).then((data) => ({ ...data, items: data.items.map(toRow) })),
-        { enabled: !testingMode }
+export default function ReferralsTable() {
+    const serverQuery = useServerTableQuery((params) =>
+        fetchReferralCommissions(params).then((data) => ({ ...data, items: data.items.map(toRow) }))
     );
 
-    const referrals = testingMode ? clientQuery.filteredData : serverQuery.items;
-    const searchText = testingMode ? clientQuery.searchText : serverQuery.searchInput;
-    const setSearchText = testingMode ? clientQuery.setSearchText : serverQuery.setSearchInput;
-    const loading = !testingMode && serverQuery.loading;
+    const referrals = serverQuery.items;
+    const searchText = serverQuery.searchInput;
+    const setSearchText = serverQuery.setSearchInput;
+    const loading = serverQuery.loading;
     const [saving, setSaving] = useState(false);
 
     const [viewing, setViewing] = useState(null);
@@ -66,23 +55,6 @@ function ReferralsTableInner({ testingMode }) {
 
     const handleSaveEdit = async () => {
         const values = await form.validateFields();
-
-        if (testingMode) {
-            setMockReferrals((prev) =>
-                prev.map((r) =>
-                    r.id === editing.id
-                        ? {
-                              ...r,
-                              ...values,
-                              sentAt: values.status === 'sent' && !r.sentAt ? new Date().toISOString().slice(0, 10) : r.sentAt,
-                          }
-                        : r
-                )
-            );
-            message.success('Referral commission updated');
-            setEditing(null);
-            return;
-        }
 
         setSaving(true);
         try {
@@ -121,11 +93,20 @@ function ReferralsTableInner({ testingMode }) {
         },
         { title: 'Joined Date', dataIndex: 'joinedDate' },
         {
+            title: 'Consultation Booked',
+            dataIndex: 'consultationBooked',
+            render: (value) => <BooleanTag value={value} />,
+        },
+        {
+            title: 'Product Bought',
+            dataIndex: 'productBought',
+            render: (value) => <BooleanTag value={value} />,
+        },
+        {
             title: 'Commission Status',
             dataIndex: 'status',
             filters: STATUS_OPTIONS.map(({ label, value }) => ({ text: label, value })),
-            filteredValue: testingMode ? undefined : [serverQuery.filters.status].filter(Boolean),
-            onFilter: testingMode ? (value, record) => record.status === value : undefined,
+            filteredValue: [serverQuery.filters.status].filter(Boolean),
             render: (status) => <StatusTag status={status} />,
         },
         {
@@ -153,8 +134,8 @@ function ReferralsTableInner({ testingMode }) {
                 columns={columns}
                 data={referrals}
                 loading={loading}
-                pagination={testingMode ? undefined : { ...serverQuery.pagination, total: serverQuery.total }}
-                onChange={testingMode ? undefined : serverQuery.handleTableChange}
+                pagination={{ ...serverQuery.pagination, total: serverQuery.total }}
+                onChange={serverQuery.handleTableChange}
             />
 
             <Modal open={!!viewing} title="Referral Details" onCancel={() => setViewing(null)} footer={null}>
@@ -168,6 +149,12 @@ function ReferralsTableInner({ testingMode }) {
                                 {viewing.referredName} ({viewing.referredEmail})
                             </Descriptions.Item>
                             <Descriptions.Item label="Joined Date">{viewing.joinedDate}</Descriptions.Item>
+                            <Descriptions.Item label="Consultation Booked">
+                                <BooleanTag value={viewing.consultationBooked} />
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Product Bought">
+                                <BooleanTag value={viewing.productBought} />
+                            </Descriptions.Item>
                             <Descriptions.Item label="Status">
                                 <StatusTag status={viewing.status} />
                             </Descriptions.Item>
@@ -203,30 +190,28 @@ function ReferralsTableInner({ testingMode }) {
                     <Form.Item name="notes" label="Notes">
                         <Input.TextArea rows={3} placeholder="Optional notes (e.g. payment method)" />
                     </Form.Item>
-                    {!testingMode && (
-                        <Form.Item label="Proof Screenshot (optional)">
-                            {editing?.proofScreenshot && proofFileList.length === 0 && (
-                                <div className="mb-2">
-                                    <Image src={imageUrl(editing.proofScreenshot)} width={100} className="rounded-lg" />
+                    <Form.Item label="Proof Screenshot (optional)">
+                        {editing?.proofScreenshot && proofFileList.length === 0 && (
+                            <div className="mb-2">
+                                <Image src={imageUrl(editing.proofScreenshot)} width={100} className="rounded-lg" />
+                            </div>
+                        )}
+                        <Upload
+                            listType="picture-card"
+                            fileList={proofFileList}
+                            beforeUpload={() => false}
+                            onChange={({ fileList }) => setProofFileList(fileList.slice(-1))}
+                            accept="image/*"
+                            maxCount={1}
+                        >
+                            {proofFileList.length >= 1 ? null : (
+                                <div>
+                                    <PlusOutlined />
+                                    <div className="mt-1 text-xs">Upload</div>
                                 </div>
                             )}
-                            <Upload
-                                listType="picture-card"
-                                fileList={proofFileList}
-                                beforeUpload={() => false}
-                                onChange={({ fileList }) => setProofFileList(fileList.slice(-1))}
-                                accept="image/*"
-                                maxCount={1}
-                            >
-                                {proofFileList.length >= 1 ? null : (
-                                    <div>
-                                        <PlusOutlined />
-                                        <div className="mt-1 text-xs">Upload</div>
-                                    </div>
-                                )}
-                            </Upload>
-                        </Form.Item>
-                    )}
+                        </Upload>
+                    </Form.Item>
                 </Form>
             </Modal>
         </div>

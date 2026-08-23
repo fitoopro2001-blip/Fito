@@ -7,7 +7,6 @@ import SearchBar from '../../molecules/SearchBar';
 import RowActions from '../../molecules/RowActions';
 import StatusTag from '../../atoms/StatusTag';
 import DataTable from '../DataTable';
-import useTableQuery from '../../../hooks/useTableQuery';
 import useServerTableQuery from '../../../hooks/useServerTableQuery';
 import { CONSULTATION_GOALS, CONSULTATION_STATUSES } from '../../../constants/consultationGoals';
 import { consultationDetailPath } from '../../../constants/routes';
@@ -18,25 +17,21 @@ const toRow = (c) => ({ ...c, user: c.personalInfo?.fullName });
 
 // `goal` fixes this table to one goal category (used by the per-goal tabs);
 // omit it for the "All" tab, where the Goal column's own filter applies instead.
-export default function ConsultationTable({ initialData, testingMode = true, goal, showGoal = false }) {
+export default function ConsultationTable({ goal, showGoal = false }) {
     const { isSuperAdmin } = useAuth();
     const navigate = useNavigate();
 
-    const [mockData, setMockData] = useState(initialData);
-    const clientQuery = useTableQuery(mockData, { searchKeys: ['id', 'user'] });
-    const serverQuery = useServerTableQuery(
-        (params) =>
-            fetchConsultations({ ...params, goal: goal ?? params.goal }).then((data) => ({
-                ...data,
-                items: data.items.map(toRow),
-            })),
-        { enabled: !testingMode }
+    const serverQuery = useServerTableQuery((params) =>
+        fetchConsultations({ ...params, goal: goal ?? params.goal }).then((data) => ({
+            ...data,
+            items: data.items.map(toRow),
+        }))
     );
 
-    const data = testingMode ? clientQuery.filteredData : serverQuery.items;
-    const searchText = testingMode ? clientQuery.searchText : serverQuery.searchInput;
-    const setSearchText = testingMode ? clientQuery.setSearchText : serverQuery.setSearchInput;
-    const loading = !testingMode && serverQuery.loading;
+    const data = serverQuery.items;
+    const searchText = serverQuery.searchInput;
+    const setSearchText = serverQuery.setSearchInput;
+    const loading = serverQuery.loading;
 
     const [editing, setEditing] = useState(null);
     const [form] = Form.useForm();
@@ -50,13 +45,6 @@ export default function ConsultationTable({ initialData, testingMode = true, goa
         const values = await form.validateFields();
         const assignedDate = values.assignedDate.format('YYYY-MM-DD');
 
-        if (testingMode) {
-            setMockData((prev) => prev.map((r) => (r.id === editing.id ? { ...r, ...values, assignedDate } : r)));
-            message.success('Consultation updated');
-            setEditing(null);
-            return;
-        }
-
         try {
             await updateConsultation(editing.id, { status: values.status, assignedDate });
             serverQuery.refetch();
@@ -68,12 +56,6 @@ export default function ConsultationTable({ initialData, testingMode = true, goa
     };
 
     const handleDelete = async (id) => {
-        if (testingMode) {
-            setMockData((prev) => prev.filter((r) => r.id !== id));
-            message.success('Consultation deleted');
-            return;
-        }
-
         try {
             await deleteConsultation(id);
             serverQuery.refetch();
@@ -83,20 +65,19 @@ export default function ConsultationTable({ initialData, testingMode = true, goa
         }
     };
 
-    // Deletion is super-admin-only on the backend once wired to the real API.
-    const canDelete = testingMode || isSuperAdmin;
+    // Deletion is super-admin-only.
+    const canDelete = isSuperAdmin;
 
     const columns = [
         { title: 'Consultation ID', dataIndex: 'id' },
-        { title: 'User', dataIndex: 'user', sorter: testingMode ? (a, b) => a.user.localeCompare(b.user) : undefined },
+        { title: 'User', dataIndex: 'user' },
         ...(showGoal
             ? [
                   {
                       title: 'Goal',
                       dataIndex: 'goal',
                       filters: CONSULTATION_GOALS.map((g) => ({ text: g.title, value: g.id })),
-                      filteredValue: testingMode ? undefined : [serverQuery.filters.goal].filter(Boolean),
-                      onFilter: testingMode ? (value, record) => record.goal === value : undefined,
+                      filteredValue: [serverQuery.filters.goal].filter(Boolean),
                       render: (goalId) => {
                           const goalConfig = CONSULTATION_GOALS.find((g) => g.id === goalId);
                           return (
@@ -112,19 +93,16 @@ export default function ConsultationTable({ initialData, testingMode = true, goa
             title: 'Status',
             dataIndex: 'status',
             filters: CONSULTATION_STATUSES.map((s) => ({ text: s, value: s })),
-            filteredValue: testingMode ? undefined : [serverQuery.filters.status].filter(Boolean),
-            onFilter: testingMode ? (value, record) => record.status === value : undefined,
+            filteredValue: [serverQuery.filters.status].filter(Boolean),
             render: (status) => <StatusTag status={status} />,
         },
         {
             title: 'Assigned Date',
             dataIndex: 'assignedDate',
-            sorter: testingMode ? (a, b) => a.assignedDate.localeCompare(b.assignedDate) : undefined,
         },
         {
             title: 'Created At',
             dataIndex: 'createdAt',
-            sorter: testingMode ? (a, b) => a.createdAt.localeCompare(b.createdAt) : undefined,
         },
         {
             title: 'Actions',
@@ -148,8 +126,8 @@ export default function ConsultationTable({ initialData, testingMode = true, goa
                 columns={columns}
                 data={data}
                 loading={loading}
-                pagination={testingMode ? undefined : { ...serverQuery.pagination, total: serverQuery.total }}
-                onChange={testingMode ? undefined : serverQuery.handleTableChange}
+                pagination={{ ...serverQuery.pagination, total: serverQuery.total }}
+                onChange={serverQuery.handleTableChange}
             />
 
             <Modal

@@ -4,9 +4,7 @@ import { Button, Input, InputNumber, Card, Tag, Spin, message, Empty, Result } f
 import { ArrowLeftOutlined, PlusOutlined, CloseOutlined, PauseCircleOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import ConfirmDeleteButton from '../../components/molecules/ConfirmDeleteButton';
 import { CONSULTATION_GOALS } from '../../constants/consultationGoals';
-import { consultationPlans as mockConsultationPlans } from '../../data/consultationPlans';
 import { ROUTES } from '../../constants/routes';
-import { useTestingMode } from '../../context/TestingModeContext';
 import {
     fetchConsultationPlans,
     createConsultationPlan,
@@ -31,30 +29,16 @@ const finalPrice = (plan) =>
     plan.discountPercent > 0 ? Math.round(plan.price * (1 - plan.discountPercent / 100)) : plan.price;
 
 export default function ConsultationPlanPricingPage() {
-    const { testingMode } = useTestingMode();
-    return <ConsultationPlanPricingPageInner key={testingMode} testingMode={testingMode} />;
-}
-
-function ConsultationPlanPricingPageInner({ testingMode }) {
     const navigate = useNavigate();
     const { goalId } = useParams();
     const goal = CONSULTATION_GOALS.find((g) => g.id === goalId);
 
     const [plans, setPlans] = useState([]);
-    const [loading, setLoading] = useState(!testingMode);
+    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (!goal) return undefined;
-
-        if (testingMode) {
-            const goalPlans = mockConsultationPlans
-                .filter((p) => p.goal === goal.id)
-                .map((p) => ({ ...p, key: p.id, features: [...(p.features ?? [])] }));
-            setPlans(goalPlans);
-            setLoading(false);
-            return undefined;
-        }
 
         let cancelled = false;
         setLoading(true);
@@ -72,7 +56,7 @@ function ConsultationPlanPricingPageInner({ testingMode }) {
         return () => {
             cancelled = true;
         };
-    }, [goal, testingMode]);
+    }, [goal]);
 
     if (!goal) {
         return (
@@ -117,7 +101,7 @@ function ConsultationPlanPricingPageInner({ testingMode }) {
 
     const togglePause = async (plan) => {
         const isPaused = !plan.isPaused;
-        if (testingMode || plan.isNew) {
+        if (plan.isNew) {
             updatePlan(plan.key, { isPaused });
             return;
         }
@@ -131,7 +115,7 @@ function ConsultationPlanPricingPageInner({ testingMode }) {
     };
 
     const removePlan = async (plan) => {
-        if (testingMode || plan.isNew) {
+        if (plan.isNew) {
             setPlans((prev) => prev.filter((p) => p.key !== plan.key));
             return;
         }
@@ -162,11 +146,6 @@ function ConsultationPlanPricingPageInner({ testingMode }) {
         }
 
         const cleaned = plans.map((p) => ({ ...p, features: p.features.map((f) => f.trim()).filter(Boolean) }));
-
-        if (testingMode) {
-            message.success('Pricing saved');
-            return;
-        }
 
         setSaving(true);
         try {

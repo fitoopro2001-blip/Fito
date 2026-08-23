@@ -8,11 +8,8 @@ import SearchBar from '../../components/molecules/SearchBar';
 import RowActions from '../../components/molecules/RowActions';
 import StatusTag from '../../components/atoms/StatusTag';
 import DataTable from '../../components/organisms/DataTable';
-import useTableQuery from '../../hooks/useTableQuery';
 import useServerTableQuery from '../../hooks/useServerTableQuery';
-import useMockBlogs from '../../hooks/useMockBlogs';
 import { BLOG_CATEGORIES } from '../../data/blogs';
-import { useTestingMode } from '../../context/TestingModeContext';
 import imageUrl from '../../utils/imageUrl';
 import { ROUTES, blogEditPath } from '../../constants/routes';
 import { fetchBlogs, deleteBlog as deleteBlogApi } from '../../api/adminBlogs.api';
@@ -20,29 +17,17 @@ import { fetchBlogs, deleteBlog as deleteBlogApi } from '../../api/adminBlogs.ap
 const apiError = (err, fallback) => err?.response?.data?.message || fallback;
 
 export default function BlogManagementPage() {
-    const { testingMode } = useTestingMode();
-    return <BlogManagementPageInner key={testingMode} testingMode={testingMode} />;
-}
-
-function BlogManagementPageInner({ testingMode }) {
     const navigate = useNavigate();
-    const [mockBlogs, setMockBlogs] = useMockBlogs();
-    const clientQuery = useTableQuery(mockBlogs, { searchKeys: ['title', 'author', 'category'] });
-    const serverQuery = useServerTableQuery(fetchBlogs, { enabled: !testingMode });
+    const serverQuery = useServerTableQuery(fetchBlogs);
 
-    const blogs = testingMode ? clientQuery.filteredData : serverQuery.items;
-    const searchText = testingMode ? clientQuery.searchText : serverQuery.searchInput;
-    const setSearchText = testingMode ? clientQuery.setSearchText : serverQuery.setSearchInput;
-    const loading = !testingMode && serverQuery.loading;
+    const blogs = serverQuery.items;
+    const searchText = serverQuery.searchInput;
+    const setSearchText = serverQuery.setSearchInput;
+    const loading = serverQuery.loading;
 
     const [viewing, setViewing] = useState(null);
 
     const handleDelete = async (id) => {
-        if (testingMode) {
-            setMockBlogs((prev) => prev.filter((b) => b.id !== id));
-            message.success('Blog deleted');
-            return;
-        }
         try {
             await deleteBlogApi(id);
             serverQuery.refetch();
@@ -60,26 +45,23 @@ function BlogManagementPageInner({ testingMode }) {
                 <Image src={imageUrl(image)} width={48} height={48} className="rounded-lg object-cover" fallback="" />
             ),
         },
-        { title: 'Title', dataIndex: 'title', sorter: testingMode ? (a, b) => a.title.localeCompare(b.title) : undefined },
+        { title: 'Title', dataIndex: 'title' },
         {
             title: 'Category',
             dataIndex: 'category',
             filters: BLOG_CATEGORIES.map((c) => ({ text: c, value: c })),
-            filteredValue: testingMode ? undefined : [serverQuery.filters.category].filter(Boolean),
-            onFilter: testingMode ? (value, record) => record.category === value : undefined,
+            filteredValue: [serverQuery.filters.category].filter(Boolean),
         },
         { title: 'Author', dataIndex: 'author' },
         {
             title: 'Date',
             dataIndex: 'date',
-            sorter: testingMode ? (a, b) => String(a.date ?? '').localeCompare(String(b.date ?? '')) : undefined,
         },
         {
             title: 'Status',
             dataIndex: 'status',
             filters: [{ text: 'Published', value: 'published' }, { text: 'Draft', value: 'draft' }],
-            filteredValue: testingMode ? undefined : [serverQuery.filters.status].filter(Boolean),
-            onFilter: testingMode ? (value, record) => record.status === value : undefined,
+            filteredValue: [serverQuery.filters.status].filter(Boolean),
             render: (status) => <StatusTag status={status} />,
         },
         {
@@ -114,8 +96,8 @@ function BlogManagementPageInner({ testingMode }) {
                 columns={columns}
                 data={blogs}
                 loading={loading}
-                pagination={testingMode ? undefined : { ...serverQuery.pagination, total: serverQuery.total }}
-                onChange={testingMode ? undefined : serverQuery.handleTableChange}
+                pagination={{ ...serverQuery.pagination, total: serverQuery.total }}
+                onChange={serverQuery.handleTableChange}
             />
 
             <Modal

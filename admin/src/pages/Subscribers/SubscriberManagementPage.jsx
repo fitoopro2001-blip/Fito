@@ -7,10 +7,7 @@ import SearchBar from '../../components/molecules/SearchBar';
 import ConfirmDeleteButton from '../../components/molecules/ConfirmDeleteButton';
 import DataTable from '../../components/organisms/DataTable';
 import RichTextEditor from '../../components/molecules/RichTextEditor';
-import useTableQuery from '../../hooks/useTableQuery';
 import useServerTableQuery from '../../hooks/useServerTableQuery';
-import { subscribers as initialSubscribers } from '../../data/subscribers';
-import { useTestingMode } from '../../context/TestingModeContext';
 import {
     fetchSubscribers,
     sendBroadcast as sendBroadcastApi,
@@ -20,20 +17,13 @@ import {
 const apiError = (err, fallback) => err?.response?.data?.message || fallback;
 
 export default function SubscriberManagementPage() {
-    const { testingMode } = useTestingMode();
-    return <SubscriberManagementPageInner key={testingMode} testingMode={testingMode} />;
-}
+    const serverQuery = useServerTableQuery(fetchSubscribers);
 
-function SubscriberManagementPageInner({ testingMode }) {
-    const [mockSubscribers, setMockSubscribers] = useState(initialSubscribers);
-    const clientQuery = useTableQuery(mockSubscribers, { searchKeys: ['email'] });
-    const serverQuery = useServerTableQuery(fetchSubscribers, { enabled: !testingMode });
-
-    const subscribers = testingMode ? clientQuery.filteredData : serverQuery.items;
-    const searchText = testingMode ? clientQuery.searchText : serverQuery.searchInput;
-    const setSearchText = testingMode ? clientQuery.setSearchText : serverQuery.setSearchInput;
-    const loading = !testingMode && serverQuery.loading;
-    const subscriberCount = testingMode ? mockSubscribers.length : serverQuery.total;
+    const subscribers = serverQuery.items;
+    const searchText = serverQuery.searchInput;
+    const setSearchText = serverQuery.setSearchInput;
+    const loading = serverQuery.loading;
+    const subscriberCount = serverQuery.total;
 
     const [composeOpen, setComposeOpen] = useState(false);
     const [subject, setSubject] = useState('');
@@ -52,16 +42,6 @@ function SubscriberManagementPageInner({ testingMode }) {
             return;
         }
 
-        if (testingMode) {
-            setSending(true);
-            setTimeout(() => {
-                setSending(false);
-                message.success(`Sent to ${mockSubscribers.length} subscriber(s)`);
-                closeCompose();
-            }, 800);
-            return;
-        }
-
         setSending(true);
         try {
             const { sent, failed } = await sendBroadcastApi({ subject, message: body });
@@ -77,11 +57,6 @@ function SubscriberManagementPageInner({ testingMode }) {
     };
 
     const handleDelete = async (id) => {
-        if (testingMode) {
-            setMockSubscribers((prev) => prev.filter((s) => s.id !== id));
-            message.success('Subscriber removed');
-            return;
-        }
         try {
             await deleteSubscriberApi(id);
             serverQuery.refetch();
@@ -92,11 +67,10 @@ function SubscriberManagementPageInner({ testingMode }) {
     };
 
     const columns = [
-        { title: 'Email', dataIndex: 'email', sorter: testingMode ? (a, b) => a.email.localeCompare(b.email) : undefined },
+        { title: 'Email', dataIndex: 'email' },
         {
             title: 'Subscribed On',
             dataIndex: 'createdAt',
-            sorter: testingMode ? (a, b) => String(a.createdAt ?? '').localeCompare(String(b.createdAt ?? '')) : undefined,
             render: (date) => (date ? new Date(date).toLocaleDateString() : '—'),
         },
         {
@@ -132,8 +106,8 @@ function SubscriberManagementPageInner({ testingMode }) {
                 columns={columns}
                 data={subscribers}
                 loading={loading}
-                pagination={testingMode ? undefined : { ...serverQuery.pagination, total: serverQuery.total }}
-                onChange={testingMode ? undefined : serverQuery.handleTableChange}
+                pagination={{ ...serverQuery.pagination, total: serverQuery.total }}
+                onChange={serverQuery.handleTableChange}
             />
 
             <Modal

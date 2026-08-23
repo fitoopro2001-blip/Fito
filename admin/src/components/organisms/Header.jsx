@@ -5,7 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 import { ROLE_LABELS } from '../../constants/roles';
 import { ROUTES } from '../../constants/routes';
 import { PAGE_TITLES } from '../../constants/pageTitles';
-import TestingModeToggle from '../atoms/TestingModeToggle';
 
 const getPageTitle = (pathname) => {
     const match = PAGE_TITLES.find((entry) => matchPath({ path: entry.path, end: true }, pathname));
@@ -48,7 +47,6 @@ export default function Header({ collapsed, isMobile, onToggle }) {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                <TestingModeToggle />
                 <Dropdown menu={{ items: menuItems }} trigger={['click']}>
                     <button type="button" className="flex items-center gap-3 cursor-pointer rounded-lg px-2 py-1.5 -mr-2 hover:bg-gray-50 transition-colors">
                         <div className="text-right hidden sm:block">

@@ -4,6 +4,8 @@ import {
     signupAdmin,
     verifyAdminOtp,
     resendAdminOtp,
+    forgotPasswordAdmin,
+    resetPasswordAdmin,
     getMeAdmin,
     createAdmin,
     listAdmins,
@@ -20,6 +22,8 @@ router.post('/login', loginAdmin);
 router.post('/signup', signupAdmin);
 router.post('/verify-otp', verifyAdminOtp);
 router.post('/resend-otp', resendAdminOtp);
+router.post('/forgot-password', forgotPasswordAdmin);
+router.post('/reset-password', resetPasswordAdmin);
 router.get('/me', protectAdmin, getMeAdmin);
 // Only an authenticated super admin can create new admin accounts.
 router.post('/create', protectAdmin, requireSuperAdmin, createAdmin);

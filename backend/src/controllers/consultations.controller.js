@@ -126,20 +126,24 @@ export const createConsultation = asyncHandler(async (req, res) => {
         transactionId,
     });
 
-    // First consultation from a referred user creates their (single) commission
-    // record for their referrer to be tracked/paid against; upsert with
-    // $setOnInsert so later consultations from the same user don't duplicate it.
+    // First consultation from a referred user creates (or updates) their
+    // (single) commission record for their referrer to be tracked/paid
+    // against. The order-triggered path (see orders.controller.js) may have
+    // created this same doc first, so triggeringConsultation is backfilled
+    // separately (only if unset) rather than via $setOnInsert, which would
+    // never fire once the doc already exists.
     if (req.user.referredBy) {
         await ReferralCommission.updateOne(
             { referredUser: req.user._id },
             {
-                $setOnInsert: {
-                    referrer: req.user.referredBy,
-                    referredUser: req.user._id,
-                    triggeringConsultation: consultation._id,
-                },
+                $set: { consultationBooked: true },
+                $setOnInsert: { referrer: req.user.referredBy, referredUser: req.user._id },
             },
             { upsert: true }
+        );
+        await ReferralCommission.updateOne(
+            { referredUser: req.user._id, triggeringConsultation: { $exists: false } },
+            { $set: { triggeringConsultation: consultation._id } }
         );
     }
 

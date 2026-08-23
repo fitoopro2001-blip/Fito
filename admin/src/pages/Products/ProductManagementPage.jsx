@@ -10,19 +10,16 @@ import StatusTag from '../../components/atoms/StatusTag';
 import RatingStars from '../../components/atoms/RatingStars';
 import DataTable from '../../components/organisms/DataTable';
 import SortableProductsTable from '../../components/organisms/SortableProductsTable';
-import useTableQuery from '../../hooks/useTableQuery';
 import useServerTableQuery from '../../hooks/useServerTableQuery';
-import useMockProducts from '../../hooks/useMockProducts';
 import useCategories from '../../hooks/useCategories';
 import { ROUTES, productEditPath } from '../../constants/routes';
-import { useTestingMode } from '../../context/TestingModeContext';
 import imageUrl from '../../utils/imageUrl';
 import { fetchProducts, deleteProduct as deleteProductApi, reorderProducts } from '../../api/adminProducts.api';
 
 const apiError = (err, fallback) => err?.response?.data?.message || fallback;
 
-// The real API already includes `discountedPrice`; mock/testing-mode products
-// don't, so it's derived here from price + discountPercent when missing.
+// The real API already includes `discountedPrice`; derive it from
+// price + discountPercent when missing.
 const finalPrice = (product) =>
     product.discountedPrice ??
     (product.discountPercent > 0
@@ -30,23 +27,15 @@ const finalPrice = (product) =>
         : product.price);
 
 export default function ProductManagementPage() {
-    const { testingMode } = useTestingMode();
-    // Remounts (resetting local state) whenever testing mode is toggled.
-    return <ProductManagementPageInner key={testingMode} testingMode={testingMode} />;
-}
-
-function ProductManagementPageInner({ testingMode }) {
     const navigate = useNavigate();
-    const [mockProducts, setMockProducts] = useMockProducts();
-    const clientQuery = useTableQuery(mockProducts, { searchKeys: ['name', 'category'] });
-    const serverQuery = useServerTableQuery(fetchProducts, { enabled: !testingMode });
+    const serverQuery = useServerTableQuery(fetchProducts);
     const { categories } = useCategories();
     const categoryName = (slug) => categories.find((c) => c.slug === slug)?.name ?? slug;
 
-    const products = testingMode ? clientQuery.filteredData : serverQuery.items;
-    const searchText = testingMode ? clientQuery.searchText : serverQuery.searchInput;
-    const setSearchText = testingMode ? clientQuery.setSearchText : serverQuery.setSearchInput;
-    const loading = !testingMode && serverQuery.loading;
+    const products = serverQuery.items;
+    const searchText = serverQuery.searchInput;
+    const setSearchText = serverQuery.setSearchInput;
+    const loading = serverQuery.loading;
 
     // Set when arriving from the dashboard's "Best Selling"/"Out of Stock"
     // lists — highlights and scrolls to the product that was clicked.
@@ -70,11 +59,6 @@ function ProductManagementPageInner({ testingMode }) {
     const [reorderLoading, setReorderLoading] = useState(false);
 
     const enterReorderMode = async () => {
-        if (testingMode) {
-            setReorderItems(mockProducts);
-            setReorderMode(true);
-            return;
-        }
         setReorderLoading(true);
         setReorderMode(true);
         try {
@@ -90,15 +74,11 @@ function ProductManagementPageInner({ testingMode }) {
 
     const exitReorderMode = () => {
         setReorderMode(false);
-        if (!testingMode) serverQuery.refetch();
+        serverQuery.refetch();
     };
 
     const handleReorder = async (nextItems) => {
         setReorderItems(nextItems);
-        if (testingMode) {
-            setMockProducts(nextItems);
-            return;
-        }
         try {
             await reorderProducts(nextItems.map((item) => item.id));
         } catch (err) {
@@ -107,11 +87,6 @@ function ProductManagementPageInner({ testingMode }) {
     };
 
     const handleDelete = async (id) => {
-        if (testingMode) {
-            setMockProducts((prev) => prev.filter((p) => p.id !== id));
-            message.success('Product deleted');
-            return;
-        }
         try {
             await deleteProductApi(id);
             serverQuery.refetch();
@@ -129,19 +104,17 @@ function ProductManagementPageInner({ testingMode }) {
                 <Image src={imageUrl(image)} width={48} height={48} className="rounded-lg object-cover" fallback="" />
             ),
         },
-        { title: 'Name', dataIndex: 'name', sorter: testingMode ? (a, b) => a.name.localeCompare(b.name) : undefined },
+        { title: 'Name', dataIndex: 'name' },
         {
             title: 'Category',
             dataIndex: 'category',
             filters: categories.map((c) => ({ text: c.name, value: c.slug })),
-            filteredValue: testingMode ? undefined : [serverQuery.filters.category].filter(Boolean),
-            onFilter: testingMode ? (value, record) => record.category === value : undefined,
+            filteredValue: [serverQuery.filters.category].filter(Boolean),
             render: (category) => categoryName(category),
         },
         {
             title: 'Price',
             dataIndex: 'price',
-            sorter: testingMode ? (a, b) => a.price - b.price : undefined,
             render: (p, record) =>
                 record.discountPercent > 0 ? (
                     <span className="text-gray-400 line-through">{`Rs. ${p.toFixed(2)}`}</span>
@@ -160,7 +133,7 @@ function ProductManagementPageInner({ testingMode }) {
             key: 'finalPrice',
             render: (_, record) => <span className="font-semibold">{`Rs. ${finalPrice(record).toFixed(2)}`}</span>,
         },
-        { title: 'Stock', dataIndex: 'stock', sorter: testingMode ? (a, b) => a.stock - b.stock : undefined },
+        { title: 'Stock', dataIndex: 'stock' },
         { title: 'Rating', dataIndex: 'rating', render: (r) => <RatingStars rating={r ?? 0} /> },
         {
             title: 'Status',
@@ -171,8 +144,7 @@ function ProductManagementPageInner({ testingMode }) {
                 { text: 'Out of Stock', value: 'out_of_stock' },
                 { text: 'Coming Soon', value: 'coming_soon' },
             ],
-            filteredValue: testingMode ? undefined : [serverQuery.filters.status].filter(Boolean),
-            onFilter: testingMode ? (value, record) => record.status === value : undefined,
+            filteredValue: [serverQuery.filters.status].filter(Boolean),
             render: (status) => <StatusTag status={status} />,
         },
         {
@@ -223,8 +195,8 @@ function ProductManagementPageInner({ testingMode }) {
                     data={products}
                     loading={loading}
                     rowClassName={(record) => (record.id === highlightProductId ? 'row-highlight' : '')}
-                    pagination={testingMode ? undefined : { ...serverQuery.pagination, total: serverQuery.total }}
-                    onChange={testingMode ? undefined : serverQuery.handleTableChange}
+                    pagination={{ ...serverQuery.pagination, total: serverQuery.total }}
+                    onChange={serverQuery.handleTableChange}
                 />
             )}
 

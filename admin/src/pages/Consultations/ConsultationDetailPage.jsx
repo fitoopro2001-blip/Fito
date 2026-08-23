@@ -5,34 +5,21 @@ import { ArrowLeftOutlined, FilePdfOutlined } from '@ant-design/icons';
 import KeyValueGrid from '../../components/molecules/KeyValueGrid';
 import ConsultationConversation from '../../components/organisms/consultations/ConsultationConversation';
 import { CONSULTATION_GOALS, STATUS_COLORS } from '../../constants/consultationGoals';
-import { consultationsByGoal } from '../../data/consultations';
 import { ROUTES } from '../../constants/routes';
-import { useTestingMode } from '../../context/TestingModeContext';
 import { fetchConsultation, sendAdminMessage } from '../../api/consultations.api';
 
 const { Title, Text } = Typography;
 
-const findMockConsultation = (id) => {
-    for (const list of Object.values(consultationsByGoal)) {
-        const found = list.find((c) => c.id === id);
-        if (found) return found;
-    }
-    return null;
-};
-
-// The admin panel's mock conversation data (and ConsultationConversation's
-// rendering) uses sender: 'dietitian' | 'user'; the real API returns
-// authorType: 'admin' | 'user'. This bridges the two so the UI stays
-// untouched either way.
-const toConversationView = (conversation, testingMode) =>
-    testingMode
-        ? conversation
-        : (conversation || []).map((m) => ({
-              id: m.id,
-              sender: m.authorType === 'admin' ? 'dietitian' : 'user',
-              text: m.message,
-              timestamp: m.createdAt,
-          }));
+// The admin panel's ConsultationConversation component uses
+// sender: 'dietitian' | 'user'; the real API returns authorType: 'admin' |
+// 'user'. This bridges the two so the UI stays untouched either way.
+const toConversationView = (conversation) =>
+    (conversation || []).map((m) => ({
+        id: m.id,
+        sender: m.authorType === 'admin' ? 'dietitian' : 'user',
+        text: m.message,
+        timestamp: m.createdAt,
+    }));
 
 const isPdfUrl = (url) => /\.pdf(\?|$)/i.test(url || '');
 
@@ -83,19 +70,17 @@ function UploadGallery({ title, images }) {
 
 export default function ConsultationDetailPage() {
     const { id } = useParams();
-    const { testingMode } = useTestingMode();
-    // Remounts (resetting all local state) whenever the id or testing mode
-    // changes, instead of syncing that reset through an effect.
-    return <ConsultationDetailPageInner key={`${id}-${testingMode}`} id={id} testingMode={testingMode} />;
+    // Remounts (resetting all local state) whenever the id changes, instead
+    // of syncing that reset through an effect.
+    return <ConsultationDetailPageInner key={id} id={id} />;
 }
 
-function ConsultationDetailPageInner({ id, testingMode }) {
+function ConsultationDetailPageInner({ id }) {
     const navigate = useNavigate();
-    const [consultation, setConsultation] = useState(testingMode ? findMockConsultation(id) : null);
-    const [loading, setLoading] = useState(!testingMode);
+    const [consultation, setConsultation] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (testingMode) return;
         let cancelled = false;
         fetchConsultation(id)
             .then((data) => {
@@ -110,7 +95,7 @@ function ConsultationDetailPageInner({ id, testingMode }) {
         return () => {
             cancelled = true;
         };
-    }, [id, testingMode]);
+    }, [id]);
 
     if (loading) {
         return (
@@ -138,23 +123,6 @@ function ConsultationDetailPageInner({ id, testingMode }) {
     const uploads = consultation.uploads || {};
 
     const handleSendMessage = async (text) => {
-        if (testingMode) {
-            setConsultation((prev) => ({
-                ...prev,
-                conversation: [
-                    ...(prev.conversation || []),
-                    {
-                        id: `dietitian-${Date.now()}`,
-                        sender: 'dietitian',
-                        text,
-                        timestamp: new Date().toISOString(),
-                    },
-                ],
-            }));
-            message.success('Reply sent to user');
-            return;
-        }
-
         try {
             const updated = await sendAdminMessage(consultation.id, text);
             setConsultation(updated);
@@ -244,7 +212,7 @@ function ConsultationDetailPageInner({ id, testingMode }) {
             <Card className="rounded-2xl border border-gray-100 shadow-sm mt-6!">
                 <Title level={5} className="!mb-3">Conversation with {consultation.personalInfo?.fullName || 'User'}</Title>
                 <ConsultationConversation
-                    messages={toConversationView(consultation.conversation, testingMode)}
+                    messages={toConversationView(consultation.conversation)}
                     onSend={handleSendMessage}
                 />
             </Card>

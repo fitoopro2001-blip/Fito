@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Typography, Button, Spin, message } from 'antd';
-import { CopyOutlined, GiftOutlined, TeamOutlined, MedicineBoxOutlined } from '@ant-design/icons';
+import { CopyOutlined, GiftOutlined, TeamOutlined, MedicineBoxOutlined, ShoppingOutlined } from '@ant-design/icons';
 
 import useAuth from '@/hooks/useAuth';
 import { getMyReferralSummary } from '@/services/referral.service';
@@ -99,7 +99,7 @@ function ProfilePageInner({ user, isAuthenticated }) {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
                   <TeamOutlined className="text-primary text-xl" />
                   <div>
@@ -112,6 +112,13 @@ function ProfilePageInner({ user, isAuthenticated }) {
                   <div>
                     <div className="text-white text-xl font-semibold">{stats?.consultationsBooked ?? 0}</div>
                     <div className="text-gray-400 text-xs">Consultations booked</div>
+                  </div>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+                  <ShoppingOutlined className="text-primary text-xl" />
+                  <div>
+                    <div className="text-white text-xl font-semibold">{stats?.productsBought ?? 0}</div>
+                    <div className="text-gray-400 text-xs">Products bought</div>
                   </div>
                 </div>
               </div>

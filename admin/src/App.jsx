@@ -1,12 +1,12 @@
 import { ConfigProvider } from 'antd';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { TestingModeProvider } from './context/TestingModeContext';
 import { RequireAuth, RequireSuperAdmin } from './components/templates/ProtectedRoute';
 import AdminLayout from './components/templates/AdminLayout';
 import { BRAND } from './constants/theme';
 
 import LoginPage from './pages/Login/LoginPage';
+import ForgotPasswordPage from './pages/Login/ForgotPasswordPage';
 import SignupPage from './pages/Signup/SignupPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import UserManagementPage from './pages/Users/UserManagementPage';
@@ -65,11 +65,11 @@ const theme = {
 export default function App() {
   return (
     <ConfigProvider theme={theme}>
-      <TestingModeProvider>
-        <AuthProvider>
+      <AuthProvider>
           <BrowserRouter>
             <Routes>
               <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+              <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
               <Route path={ROUTES.SIGNUP} element={<SignupPage />} />
 
               <Route element={<RequireAuth />}>
@@ -104,8 +104,7 @@ export default function App() {
               <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
             </Routes>
           </BrowserRouter>
-        </AuthProvider>
-      </TestingModeProvider>
+      </AuthProvider>
     </ConfigProvider>
   );
 }

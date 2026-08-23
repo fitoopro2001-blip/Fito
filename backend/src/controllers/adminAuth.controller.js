@@ -147,6 +147,68 @@ export const resendAdminOtp = asyncHandler(async (req, res) => {
     res.json({ message: 'Verification code resent' });
 });
 
+// POST /api/admin/auth/forgot-password — self-serve reset, plain admins only.
+// Super admins can't use this flow (a compromised inbox shouldn't be able to
+// reset the account with the highest privileges); they need another super
+// admin's help instead.
+export const forgotPasswordAdmin = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        res.status(400);
+        throw new Error('Email is required');
+    }
+
+    const admin = await Admin.findOne({ email }).select(OTP_FIELDS);
+    if (!admin) {
+        res.status(404);
+        throw new Error('No admin account found with this email');
+    }
+    if (admin.role !== ROLES.ADMIN) {
+        res.status(403);
+        throw new Error('Super admin passwords can\'t be self-reset. Please contact another super admin.');
+    }
+
+    await issueOtp(admin, OTP_PURPOSE.RESET_PASSWORD);
+
+    res.json({ message: 'We emailed you a password reset code.' });
+});
+
+// POST /api/admin/auth/reset-password — confirms the OTP and sets the new
+// password. Resetting deactivates the account again: the admin has just
+// proven control of the inbox, not that they're still an authorized admin,
+// so a super admin must re-activate before they can log back in.
+export const resetPasswordAdmin = asyncHandler(async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) {
+        res.status(400);
+        throw new Error('Email, code and new password are required');
+    }
+
+    const admin = await Admin.findOne({ email }).select(`+password ${OTP_FIELDS}`);
+    if (!admin) {
+        res.status(404);
+        throw new Error('No admin account found with this email');
+    }
+    if (admin.role !== ROLES.ADMIN) {
+        res.status(403);
+        throw new Error('Super admin passwords can\'t be self-reset. Please contact another super admin.');
+    }
+
+    try {
+        await checkOtp(admin, OTP_PURPOSE.RESET_PASSWORD, otp);
+    } catch (err) {
+        res.status(err.statusCode || 400);
+        throw err;
+    }
+
+    admin.password = newPassword;
+    admin.otp = undefined;
+    admin.status = ADMIN_STATUS.INACTIVE;
+    await admin.save();
+
+    res.json({ message: 'Password reset successfully. A super admin needs to reactivate your account before you can log in.' });
+});
+
 // GET /api/admin/auth?page=&limit=&search=&status=&role= — super admin only,
 // lists all admin accounts.
 export const listAdmins = asyncHandler(async (req, res) => {

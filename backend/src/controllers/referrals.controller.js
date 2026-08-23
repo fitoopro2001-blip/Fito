@@ -14,14 +14,26 @@ export const getMyReferralSummary = asyncHandler(async (req, res) => {
         await req.user.save();
     }
 
-    const [totalReferred, consultationsBooked] = await Promise.all([
+    // Commission records created before consultationBooked existed have no
+    // such field at all (not `false`) — since consultation booking was the
+    // only trigger back then, every one of them was in fact booked. Backfill
+    // lazily, same self-healing pattern as referralCode above, so the count
+    // below doesn't silently undercount old referrals.
+    await ReferralCommission.updateMany(
+        { referrer: req.user._id, consultationBooked: { $exists: false } },
+        { $set: { consultationBooked: true } }
+    );
+
+    const [totalReferred, consultationsBooked, productsBought] = await Promise.all([
         User.countDocuments({ referredBy: req.user._id }),
-        ReferralCommission.countDocuments({ referrer: req.user._id }),
+        ReferralCommission.countDocuments({ referrer: req.user._id, consultationBooked: true }),
+        ReferralCommission.countDocuments({ referrer: req.user._id, productBought: true }),
     ]);
 
     res.json({
         referralCode: req.user.referralCode,
         totalReferred,
         consultationsBooked,
+        productsBought,
     });
 });

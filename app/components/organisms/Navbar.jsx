@@ -201,6 +201,11 @@ export default function Navbar() {
                   <Icon name="dashboard" className="w-5 h-5" />
                 </Link>
               )}
+              {isAuthenticated && (
+                <Link href="/profile" className="text-sm font-medium text-primary hover:underline transition-colors">
+                  Refer someone
+                </Link>
+              )}
               {isAuthenticated ? (
                 <div className="flex items-center gap-3">
                   <Link href="/profile" className="text-sm text-text-secondary hover:text-text transition-colors">
@@ -322,6 +327,13 @@ export default function Navbar() {
                       className="text-sm text-text-secondary hover:text-text mb-2 block"
                     >
                       Signed in as {user?.name}
+                    </Link>
+                    <Link
+                      href="/profile"
+                      onClick={() => setMobileOpen(false)}
+                      className="text-sm font-medium text-primary hover:underline mb-4 block"
+                    >
+                      Refer someone
                     </Link>
                     <Button
                       variant="outline"

@@ -122,7 +122,7 @@ function RegisterForm() {
             <button
               type="button"
               onClick={() => setLegalModal('terms')}
-              className="text-primary hover:text-primary-hover underline-offset-2 hover:underline"
+              className="text-primary hover:text-primary-hover underline-offset-2 hover:underline inline"
             >
               Terms of Service
             </button>{' '}
@@ -130,7 +130,7 @@ function RegisterForm() {
             <button
               type="button"
               onClick={() => setLegalModal('privacy')}
-              className="text-primary hover:text-primary-hover underline-offset-2 hover:underline"
+              className="text-primary hover:text-primary-hover underline-offset-2 hover:underline inline"
             >
               Privacy Policy
             </button>

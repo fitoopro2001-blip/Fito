@@ -1,4 +1,3 @@
-// sections/home/Values.jsx
 'use client';
 
 import { useRef } from 'react';

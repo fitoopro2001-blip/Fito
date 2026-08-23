@@ -2,7 +2,6 @@ import { Modal } from 'antd';
 
 const MAX_BODY_HEIGHT = '70vh';
 
-// House rule for every modal in the admin panel: centered on screen, with a
 // capped body height so long content (detail views, forms with many fields)
 // scrolls inside the modal instead of the modal itself growing past the
 // viewport. Callers can still override anything via props/styles.

@@ -13,7 +13,7 @@ export default function AuthLayout({ children }) {
           <div className="flex justify-center mb-6">
             <Logo className="h-11 w-auto" priority />
           </div>
-          <div className="glass rounded-3xl p-0 sm:p-6 shadow-2xl">{children}</div>
+          <div className="glass rounded-3xl p-4 sm:p-6 shadow-2xl">{children}</div>
         </div>
       </div>
     </ConfigProvider>

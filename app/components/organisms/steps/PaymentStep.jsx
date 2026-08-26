@@ -18,6 +18,9 @@ import Alert from '../../atoms/Alert';
 import Input from '../../atoms/Input';
 import Upload from '../../atoms/Upload';
 import { ALLOWED_IMAGE_TYPES, MAX_UPLOAD_SIZE_MB } from '../../../utils/uploadValidation';
+import { useCountry } from '../../../context/CountryContext';
+import { formatPrice } from '../../../utils/formatCurrency';
+import { resolvePlanPrice } from '../../../utils/planPrice';
 
 const PAYMENT_DETAILS = [
   { label: 'Bank Name', value: 'Meezan Bank - Rewaz Garden, Lahore', icon: <BankOutlined />, copyable: false },
@@ -72,9 +75,11 @@ export default function PaymentStep({
   updateField,
   selectedPlan,
 }) {
+  const { currency } = useCountry();
   const uploads = formData.uploads || {};
   const hasDiscount = selectedPlan?.discountPercent > 0;
-  const chargedPrice = selectedPlan ? selectedPlan.discountedPrice ?? selectedPlan.price : null;
+  const resolved = selectedPlan ? resolvePlanPrice(selectedPlan, currency) : null;
+  const chargedPrice = resolved?.discountedPrice ?? null;
 
   const handlePaymentUpload = (files) => {
     updateField("uploads", {
@@ -114,13 +119,13 @@ export default function PaymentStep({
           <div className="flex items-baseline gap-2 flex-wrap">
             <div className="text-4xl font-bold text-primary whitespace-nowrap">
               {selectedPlan
-                ? `Rs. ${chargedPrice.toLocaleString("en-US")}`
-                : "Rs. 2,500"}
+                ? formatPrice(chargedPrice, resolved.currency)
+                : formatPrice(2500, 'PKR')}
             </div>
 
             {hasDiscount && (
               <Text muted className="line-through text-lg whitespace-nowrap">
-                Rs. {selectedPlan.price.toLocaleString("en-US")}
+                {formatPrice(resolved.price, resolved.currency)}
               </Text>
             )}
           </div>
@@ -134,7 +139,7 @@ export default function PaymentStep({
 
         {selectedPlan?.durationMonths && (
           <Text muted className="text-sm mt-1">
-            Rs. {Math.round(chargedPrice / selectedPlan.durationMonths).toLocaleString("en-US")} / month
+            {formatPrice(Math.round(chargedPrice / selectedPlan.durationMonths), resolved.currency)} / month
             {' · '}{selectedPlan.durationMonths} month{selectedPlan.durationMonths > 1 ? 's' : ''}
           </Text>
         )}

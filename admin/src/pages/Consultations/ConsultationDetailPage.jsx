@@ -176,7 +176,11 @@ function ConsultationDetailPageInner({ id }) {
                             </Col>
                             <Col xs={12} sm={8}>
                                 <Text className="!text-gray-400 text-xs block mb-1">Price</Text>
-                                <Text>Rs. {consultation.plan.price?.toLocaleString('en-US')}</Text>
+                                {/* Older consultations (booked before multi-currency pricing) have no
+                                    `plan.currency` — they were always PKR. */}
+                                <Text>
+                                    {consultation.plan.currency ?? 'PKR'} {consultation.plan.price?.toLocaleString('en-US')}
+                                </Text>
                             </Col>
                         </Row>
                     </>

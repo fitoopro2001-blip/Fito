@@ -32,8 +32,12 @@ export default function useConsultationPlans() {
           label: plan.label,
           durationMonths: plan.durationMonths,
           price: plan.price,
+          priceSAR: plan.priceSAR,
+          priceUSD: plan.priceUSD,
           discountPercent: plan.discountPercent,
           discountedPrice: plan.discountedPrice,
+          discountedPriceSAR: plan.discountedPriceSAR,
+          discountedPriceUSD: plan.discountedPriceUSD,
           features: plan.features,
           isPaused: plan.isPaused,
         }));

@@ -20,6 +20,11 @@ const cleanFeatures = (features) =>
         ? features.filter((f) => typeof f === 'string' && f.trim()).map((f) => f.trim())
         : [];
 
+// Shared by create/update — `price` (PKR) uses its own required check since
+// it's mandatory; SAR/USD are optional per-call (default to 0, meaning "not
+// yet entered").
+const isValidOptionalPrice = (value) => value === undefined || (typeof value === 'number' && value >= 0);
+
 // GET /api/consultation-plans and GET /api/admin/consultation-plans — same
 // shape for both; the admin route additionally requires protectAdmin (see
 // route). Optional ?goal= scopes to one goal (used by the admin pricing page).
@@ -43,7 +48,7 @@ export const listConsultationPlans = asyncHandler(async (req, res) => {
 
 // POST /api/admin/consultation-plans — creates a new program under a goal.
 export const createConsultationPlan = asyncHandler(async (req, res) => {
-    const { goal, label, durationMonths, price, discountPercent, features, isPaused } = req.body;
+    const { goal, label, durationMonths, price, priceSAR, priceUSD, discountPercent, features, isPaused } = req.body;
 
     if (!CONSULTATION_GOALS.includes(goal)) {
         res.status(400);
@@ -61,6 +66,14 @@ export const createConsultationPlan = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Price must be a non-negative number');
     }
+    if (!isValidOptionalPrice(priceSAR)) {
+        res.status(400);
+        throw new Error('SAR price must be a non-negative number');
+    }
+    if (!isValidOptionalPrice(priceUSD)) {
+        res.status(400);
+        throw new Error('USD price must be a non-negative number');
+    }
     if (discountPercent !== undefined && (typeof discountPercent !== 'number' || discountPercent < 0 || discountPercent > 100)) {
         res.status(400);
         throw new Error('Discount percent must be between 0 and 100');
@@ -71,6 +84,8 @@ export const createConsultationPlan = asyncHandler(async (req, res) => {
         label: label.trim(),
         durationMonths,
         price,
+        priceSAR: priceSAR ?? 0,
+        priceUSD: priceUSD ?? 0,
         discountPercent: discountPercent ?? 0,
         features: cleanFeatures(features),
         isPaused: isPaused ?? false,
@@ -81,7 +96,7 @@ export const createConsultationPlan = asyncHandler(async (req, res) => {
 
 // PATCH /api/admin/consultation-plans/:id
 export const updateConsultationPlan = asyncHandler(async (req, res) => {
-    const { label, durationMonths, price, discountPercent, features, isPaused } = req.body;
+    const { label, durationMonths, price, priceSAR, priceUSD, discountPercent, features, isPaused } = req.body;
 
     const plan = await ConsultationPlan.findById(req.params.id);
     if (!plan) {
@@ -109,6 +124,20 @@ export const updateConsultationPlan = asyncHandler(async (req, res) => {
             throw new Error('Price must be a non-negative number');
         }
         plan.price = price;
+    }
+    if (priceSAR !== undefined) {
+        if (typeof priceSAR !== 'number' || priceSAR < 0) {
+            res.status(400);
+            throw new Error('SAR price must be a non-negative number');
+        }
+        plan.priceSAR = priceSAR;
+    }
+    if (priceUSD !== undefined) {
+        if (typeof priceUSD !== 'number' || priceUSD < 0) {
+            res.status(400);
+            throw new Error('USD price must be a non-negative number');
+        }
+        plan.priceUSD = priceUSD;
     }
     if (discountPercent !== undefined) {
         if (typeof discountPercent !== 'number' || discountPercent < 0 || discountPercent > 100) {

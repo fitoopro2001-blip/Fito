@@ -5,6 +5,8 @@ import JsonLd from '@/components/shared/JsonLd';
 import { organizationJsonLd } from '@/lib/jsonld';
 import { buildMetadata } from '@/lib/seo';
 import { SITE_NAME } from '@/config/siteConfig';
+import { CountryProvider } from '@/context/CountryContext';
+import { getServerCountry } from '@/utils/serverCountry';
 
 // The theme already declared --font-geist-sans/--font-geist-mono but nothing
 // ever defined them, so body fell back to Arial. next/font self-hosts the
@@ -36,7 +38,9 @@ export const metadata = {
   title: { default: SITE_NAME, template: `%s | ${SITE_NAME}` },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const { country } = await getServerCountry();
+
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
@@ -45,7 +49,9 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <JsonLd data={organizationJsonLd()} />
-        <MainLayout>{children}</MainLayout>
+        <CountryProvider initialCountry={country}>
+          <MainLayout>{children}</MainLayout>
+        </CountryProvider>
       </body>
     </html>
   );

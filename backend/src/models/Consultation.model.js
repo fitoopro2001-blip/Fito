@@ -31,6 +31,10 @@ const consultationSchema = new mongoose.Schema(
             // Pre-discount price, set only when the plan had an active discount
             // at submission time — kept so admin views can show the strike-through.
             originalPrice: Number,
+            // Currency `price`/`originalPrice` are denominated in, resolved
+            // server-side from the submitter's detected country at booking
+            // time (see createConsultation) — PKR/SAR/USD.
+            currency: String,
         },
         personalInfo: {
             fullName: { type: String, required: true, trim: true },

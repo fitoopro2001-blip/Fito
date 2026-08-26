@@ -16,10 +16,13 @@ import useWishlist from '../../hooks/useWishlist';
 import useApiResource from '../../hooks/useApiResource';
 import { getProduct } from '../../services/product.service';
 import formatCategory from '../../utils/formatCategory';
+import { useCountry } from '../../context/CountryContext';
+import NotAvailableNotice from '../molecules/NotAvailableNotice';
 
 // Interactive half of the product page. The route's server component owns
 // metadata and structured data; everything stateful lives here.
 export default function ProductTemplate({ id, initialProduct = null }) {
+    const { productsAvailable } = useCountry();
     const {
         data: apiProduct,
         loading,
@@ -27,8 +30,12 @@ export default function ProductTemplate({ id, initialProduct = null }) {
         setData: setProduct,
     } = useApiResource(() => getProduct(id), [id], {
         // The server component already fetched this product for metadata, so skip
-        // the duplicate request on first paint when we have it.
-        skip: !id || Boolean(initialProduct),
+        // the duplicate request on first paint when we have it. Also skipped
+        // outright when products aren't available in the visitor's country —
+        // the route itself already renders NotAvailableNotice in that case
+        // (see app/(public)/product/[id]/page.jsx); this only guards direct
+        // reuse of this component elsewhere.
+        skip: !productsAvailable || !id || Boolean(initialProduct),
         fallback: initialProduct,
     });
 
@@ -46,6 +53,10 @@ export default function ProductTemplate({ id, initialProduct = null }) {
     if (product?.id !== selectedForProductId) {
         setSelectedForProductId(product?.id);
         if (selectedVariant) setSelectedVariant(null);
+    }
+
+    if (!productsAvailable) {
+        return <NotAvailableNotice />;
     }
 
     const hasVariants = Boolean(product?.variants?.length);

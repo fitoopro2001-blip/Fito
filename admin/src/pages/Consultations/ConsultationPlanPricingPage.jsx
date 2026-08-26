@@ -20,6 +20,8 @@ const emptyPlan = () => ({
     label: '',
     durationMonths: 1,
     price: 0,
+    priceSAR: 0,
+    priceUSD: 0,
     discountPercent: 0,
     features: [''],
     isPaused: false,
@@ -132,7 +134,9 @@ export default function ConsultationPlanPricingPage() {
         for (const p of plans) {
             if (!p.label.trim()) return 'Every program needs a name';
             if (!p.durationMonths || p.durationMonths < 1) return 'Duration must be at least 1 month';
-            if (p.price === null || p.price === undefined || p.price < 0) return 'Price must be a non-negative number';
+            if (p.price === null || p.price === undefined || p.price < 0) return 'PKR price must be a non-negative number';
+            if (p.priceSAR === null || p.priceSAR === undefined || p.priceSAR < 0) return 'SAR price must be a non-negative number';
+            if (p.priceUSD === null || p.priceUSD === undefined || p.priceUSD < 0) return 'USD price must be a non-negative number';
             if (p.discountPercent < 0 || p.discountPercent > 100) return 'Discount must be between 0 and 100';
         }
         return null;
@@ -155,6 +159,8 @@ export default function ConsultationPlanPricingPage() {
                         label: p.label.trim(),
                         durationMonths: p.durationMonths,
                         price: p.price,
+                        priceSAR: p.priceSAR ?? 0,
+                        priceUSD: p.priceUSD ?? 0,
                         discountPercent: p.discountPercent,
                         features: p.features,
                         isPaused: p.isPaused ?? false,
@@ -233,7 +239,7 @@ export default function ConsultationPlanPricingPage() {
                                         Paused — shown as &quot;Coming Soon&quot; and blurred on the app; customers can&apos;t select or buy it.
                                     </div>
                                 )}
-                                <div className="grid grid-cols-3 gap-3 mb-3">
+                                <div className="grid grid-cols-2 gap-3 mb-3">
                                     <div>
                                         <div className="text-xs text-gray-500 mb-1">Duration (months)</div>
                                         <InputNumber
@@ -244,7 +250,23 @@ export default function ConsultationPlanPricingPage() {
                                         />
                                     </div>
                                     <div>
-                                        <div className="text-xs text-gray-500 mb-1">Price (Rs.)</div>
+                                        <div className="text-xs text-gray-500 mb-1">Discount (%)</div>
+                                        <InputNumber
+                                            min={0}
+                                            max={100}
+                                            value={plan.discountPercent}
+                                            onChange={(v) => updatePlan(plan.key, { discountPercent: v ?? 0 })}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="text-xs text-gray-500 mb-1">
+                                    Pricing — entered manually per currency, no automatic conversion
+                                </div>
+                                <div className="grid grid-cols-3 gap-3 mb-3">
+                                    <div>
+                                        <div className="text-xs text-gray-500 mb-1">Price (PKR)</div>
                                         <InputNumber
                                             min={0}
                                             value={plan.price}
@@ -253,12 +275,20 @@ export default function ConsultationPlanPricingPage() {
                                         />
                                     </div>
                                     <div>
-                                        <div className="text-xs text-gray-500 mb-1">Discount (%)</div>
+                                        <div className="text-xs text-gray-500 mb-1">Price (SAR)</div>
                                         <InputNumber
                                             min={0}
-                                            max={100}
-                                            value={plan.discountPercent}
-                                            onChange={(v) => updatePlan(plan.key, { discountPercent: v ?? 0 })}
+                                            value={plan.priceSAR}
+                                            onChange={(v) => updatePlan(plan.key, { priceSAR: v ?? 0 })}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-gray-500 mb-1">Price (USD)</div>
+                                        <InputNumber
+                                            min={0}
+                                            value={plan.priceUSD}
+                                            onChange={(v) => updatePlan(plan.key, { priceUSD: v ?? 0 })}
                                             className="w-full"
                                         />
                                     </div>

@@ -5,10 +5,9 @@ import { CheckCircleFilled, CheckOutlined, InfoCircleOutlined } from '@ant-desig
 import Card from '../../atoms/Card';
 import Image from '../../atoms/Image';
 import { H2, H3, Text, Caption } from '../../atoms/Typography';
-
-function formatPrice(price) {
-  return `Rs. ${price.toLocaleString('en-US')}`;
-}
+import { useCountry } from '../../../context/CountryContext';
+import { formatPrice } from '../../../utils/formatCurrency';
+import { resolvePlanPrice } from '../../../utils/planPrice';
 
 function formatDuration(months) {
   return `${months} Month${months > 1 ? 's' : ''}`;
@@ -20,6 +19,8 @@ export default function PlanSelection({
   selectedPlan,
   onSelect,
 }) {
+  const { currency } = useCountry();
+
   return (
     <div>
 
@@ -39,7 +40,8 @@ export default function PlanSelection({
 
           const isSelected = selectedPlan?.id === plan.id;
           const hasDiscount = plan.discountPercent > 0;
-          const chargedPrice = plan.discountedPrice ?? plan.price;
+          const resolved = resolvePlanPrice(plan, currency);
+          const chargedPrice = resolved.discountedPrice;
           const isPaused = Boolean(plan.isPaused);
 
           return (
@@ -109,11 +111,11 @@ export default function PlanSelection({
                   <div className="mt-1 mb-1">
                     <div className="flex items-baseline gap-2 flex-wrap">
                       <H3 className="m-0 whitespace-nowrap">
-                        {formatPrice(chargedPrice)}
+                        {formatPrice(chargedPrice, resolved.currency)}
                       </H3>
                       {hasDiscount && (
                         <Text muted className="line-through whitespace-nowrap">
-                          {formatPrice(plan.price)}
+                          {formatPrice(resolved.price, resolved.currency)}
                         </Text>
                       )}
                     </div>
@@ -125,7 +127,7 @@ export default function PlanSelection({
                   </div>
 
                   <Text muted className="mb-4">
-                    {formatPrice(Math.round(chargedPrice / plan.durationMonths))} / month
+                    {formatPrice(Math.round(chargedPrice / plan.durationMonths), resolved.currency)} / month
                   </Text>
 
                   {plan.bestFor && (

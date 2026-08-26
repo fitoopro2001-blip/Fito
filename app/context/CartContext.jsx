@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import useLocalStorageState from '../hooks/useLocalStorageState';
+import { useCountry } from './CountryContext';
 
 const CartContext = createContext(null);
 
@@ -21,9 +22,15 @@ const lineKeyOf = (item) => item.lineId ?? String(item.id);
 
 export function CartProvider({ children }) {
   const [items, setItems] = useLocalStorageState('Fitoo_cart', []);
+  const { productsAvailable } = useCountry();
 
   const addToCart = useCallback(
     (product, quantity = 1, variant = null) => {
+      // Physical products only ship within Pakistan — this is the last line
+      // of client-side defense (every page/button that calls addToCart is
+      // already gated on productsAvailable), backed by the backend's own
+      // restrictToPakistan check on order creation, which can't be bypassed.
+      if (!productsAvailable) return;
       const variantKey = variantKeyOf(variant);
       const lineId = lineIdOf(product.id, variantKey);
       const existing = items.find((item) => lineKeyOf(item) === lineId);
@@ -49,7 +56,7 @@ export function CartProvider({ children }) {
         ];
       setItems(next);
     },
-    [items, setItems]
+    [items, setItems, productsAvailable]
   );
 
   const removeFromCart = useCallback(

@@ -16,6 +16,8 @@ import useWishlist from '../../../hooks/useWishlist';
 import { getProducts } from '../../../services/product.service';
 import { getCategories } from '../../../services/category.service';
 import comingSoonImage from '../../../assets/images/coming-soon.webp';
+import { useCountry } from '../../../context/CountryContext';
+import NotAvailableNotice from '../../../components/molecules/NotAvailableNotice';
 
 const SORT_OPTIONS = [
   { value: 'default', label: 'Default' },
@@ -42,6 +44,7 @@ function ShopPageRoot() {
 
 function ShopPageInner() {
   const searchParams = useSearchParams();
+  const { productsAvailable } = useCountry();
 
   const [searchQuery, setSearchQuery] = useState('');
   // Pre-selected from footer/nav links like /shop?category=protein-powders.
@@ -53,6 +56,7 @@ function ShopPageInner() {
   const debouncedSearch = useDebounce(searchQuery, 350);
 
   const { data: apiCategories } = useApiResource(getCategories, [], {
+    skip: !productsAvailable,
     fallback: [],
   });
 
@@ -64,7 +68,7 @@ function ShopPageInner() {
   } = useApiResource(
     () => getProducts({ category: selectedCategory, search: debouncedSearch, sort: sortBy }),
     [selectedCategory, debouncedSearch, sortBy],
-    { fallback: [] }
+    { skip: !productsAvailable, fallback: [] }
   );
 
   const categories = useMemo(() => {
@@ -81,6 +85,10 @@ function ShopPageInner() {
     setSelectedCategory('all');
     setSortBy('default');
   }, []);
+
+  if (!productsAvailable) {
+    return <NotAvailableNotice />;
+  }
 
   return (
     <div className="pt-24 pb-16">

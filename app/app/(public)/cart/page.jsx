@@ -7,10 +7,17 @@ import { H2, Text } from '../../../components/atoms/Typography';
 import Button from '../../../components/atoms/Button';
 import Icon from '../../../components/atoms/Icon';
 import QuantitySelector from '../../../components/molecules/QuantitySelector';
+import NotAvailableNotice from '../../../components/molecules/NotAvailableNotice';
 import useCart from '../../../hooks/useCart';
+import { useCountry } from '../../../context/CountryContext';
 
 export default function CartPage() {
   const { items, totalPrice, removeFromCart, updateQuantity } = useCart();
+  const { productsAvailable } = useCountry();
+
+  if (!productsAvailable) {
+    return <NotAvailableNotice />;
+  }
 
   if (items.length === 0) {
     return (

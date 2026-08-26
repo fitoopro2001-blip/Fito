@@ -15,6 +15,8 @@ import useCart from '../../../hooks/useCart';
 import { createOrder } from '../../../services/order.service';
 import { WHATSAPP_NUMBER } from '../../../utils/siteConfig';
 import { ALLOWED_IMAGE_TYPES, MAX_UPLOAD_SIZE_MB } from '../../../utils/uploadValidation';
+import { useCountry } from '../../../context/CountryContext';
+import NotAvailableNotice from '../../../components/molecules/NotAvailableNotice';
 
 function buildWhatsAppMessage(order) {
   const lines = [
@@ -41,6 +43,7 @@ function buildWhatsAppMessage(order) {
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
+  const { productsAvailable } = useCountry();
 
   const [shipping, setShipping] = useState({ name: '', email: '', phone: '', address: '', city: '' });
   const [paymentMethod, setPaymentMethod] = useState('cod');
@@ -49,6 +52,10 @@ export default function CheckoutPage() {
   const [error, setError] = useState('');
   const [order, setOrder] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  if (!productsAvailable) {
+    return <NotAvailableNotice />;
+  }
 
   const updateShipping = (field) => (e) =>
     setShipping((prev) => ({ ...prev, [field]: e.target.value }));
@@ -90,9 +97,14 @@ export default function CheckoutPage() {
       });
 
       clearCart();
-    } catch {
-      setError('Something went wrong while placing your order. Please try again.');
-      message.error('Failed to place order');
+    } catch (err) {
+      if (err?.response?.status === 403) {
+        setError('Not available in your country.');
+        message.error('Not available in your country');
+      } else {
+        setError('Something went wrong while placing your order. Please try again.');
+        message.error('Failed to place order');
+      }
     } finally {
       setSubmitting(false);
     }

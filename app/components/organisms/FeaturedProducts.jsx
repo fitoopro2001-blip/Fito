@@ -7,6 +7,7 @@ import ProductCardSkeleton from '../molecules/ProductCardSkeleton';
 import useApiResource from '../../hooks/useApiResource';
 import useWishlist from '../../hooks/useWishlist';
 import { getProducts } from '../../services/product.service';
+import { useCountry } from '../../context/CountryContext';
 
 export default function FeaturedProducts({
   title = 'Featured Supplements',
@@ -15,16 +16,25 @@ export default function FeaturedProducts({
   excludeId,
 }) {
   const { isWishlisted, toggleWishlist } = useWishlist();
+  const { productsAvailable } = useCountry();
 
   // No `sort` param: falls back to the backend's default, which follows the
-  // admin's manual drag-to-reorder order (Product.sortOrder).
+  // admin's manual drag-to-reorder order (Product.sortOrder). Skipped
+  // entirely where products aren't available — showing a marketing section
+  // for something that can't be bought would be confusing, so it just
+  // doesn't render (see the early return below) rather than showing a notice.
   const { data: apiProducts, loading } = useApiResource(() => getProducts(), [], {
+    skip: !productsAvailable,
     fallback: [],
   });
 
   const products = useMemo(() => {
     return (apiProducts ?? []).filter((p) => p.id !== excludeId).slice(0, limit);
   }, [apiProducts, excludeId, limit]);
+
+  if (!productsAvailable) {
+    return null;
+  }
 
   return (
     <section className="relative py-20 section-defer">

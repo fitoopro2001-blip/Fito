@@ -13,7 +13,14 @@ const consultationPlanSchema = new mongoose.Schema(
         // shown as-is on the app's plan selection screen.
         label: { type: String, required: true, trim: true },
         durationMonths: { type: Number, required: true, min: 1 },
+        // Admin-entered manually per currency — never derived via exchange
+        // rate. `price` (PKR) is the original/required field; `priceSAR`/
+        // `priceUSD` default to 0 until an admin fills them in (see
+        // computeConsultationPrice in consultations.controller.js for the
+        // fallback shown to visitors before that happens).
         price: { type: Number, required: true, min: 0 },
+        priceSAR: { type: Number, default: 0, min: 0 },
+        priceUSD: { type: Number, default: 0, min: 0 },
         // Percentage off `price`, shown as a struck-through original price on
         // the app. 0 means no discount.
         discountPercent: { type: Number, default: 0, min: 0, max: 100 },

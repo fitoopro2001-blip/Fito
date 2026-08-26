@@ -162,8 +162,12 @@ export const toPublicConsultationPlan = (plan) => ({
     label: plan.label,
     durationMonths: plan.durationMonths,
     price: plan.price,
+    priceSAR: plan.priceSAR ?? 0,
+    priceUSD: plan.priceUSD ?? 0,
     discountPercent: plan.discountPercent ?? 0,
     discountedPrice: computeDiscountedPrice(plan.price, plan.discountPercent ?? 0),
+    discountedPriceSAR: computeDiscountedPrice(plan.priceSAR ?? 0, plan.discountPercent ?? 0),
+    discountedPriceUSD: computeDiscountedPrice(plan.priceUSD ?? 0, plan.discountPercent ?? 0),
     features: plan.features ?? [],
     isPaused: plan.isPaused ?? false,
 });

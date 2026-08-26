@@ -8,6 +8,19 @@ import { GENDERS, ACTIVITY_LEVELS, PHONE_REGEX, EMAIL_REGEX } from '../constants
 import { REPLY_AUTHOR } from '../constants/contentStatus.js';
 import { toPublicConsultation, computeDiscountedPrice } from '../utils/serializers.js';
 import { toImageUrl } from '../middleware/upload.middleware.js';
+import { getCountryFromRequest, getCurrencyForCountry } from '../utils/geo.util.js';
+
+// Picks the plan price for the visitor's detected currency. Client-submitted
+// currency is never trusted (there isn't one) — currency is derived the same
+// way availability is for products, from the request's own country header.
+// Falls back to PKR when the resolved currency isn't PKR but an admin hasn't
+// entered that currency's price yet (still 0) — never charges 0, and never
+// mislabels an unset value as SAR/USD.
+const resolveConsultationPrice = (planDoc, currency) => {
+    if (currency === 'SAR' && planDoc.priceSAR > 0) return { price: planDoc.priceSAR, currency: 'SAR' };
+    if (currency === 'USD' && planDoc.priceUSD > 0) return { price: planDoc.priceUSD, currency: 'USD' };
+    return { price: planDoc.price, currency: 'PKR' };
+};
 
 // Multipart bodies arrive as strings, so JSON fields need parsing. Returns
 // `fallback` (rather than throwing) on malformed JSON — the caller decides
@@ -95,13 +108,16 @@ export const createConsultation = asyncHandler(async (req, res) => {
             res.status(400);
             throw new Error('Invalid plan selected');
         }
-        const discountedPrice = computeDiscountedPrice(planDoc.price, planDoc.discountPercent);
+        const currency = getCurrencyForCountry(getCountryFromRequest(req));
+        const resolved = resolveConsultationPrice(planDoc, currency);
+        const discountedPrice = computeDiscountedPrice(resolved.price, planDoc.discountPercent);
         plan = {
             id: planDoc._id,
             label: planDoc.label,
             durationMonths: planDoc.durationMonths,
             price: discountedPrice,
-            originalPrice: planDoc.discountPercent > 0 ? planDoc.price : undefined,
+            originalPrice: planDoc.discountPercent > 0 ? resolved.price : undefined,
+            currency: resolved.currency,
         };
     }
 

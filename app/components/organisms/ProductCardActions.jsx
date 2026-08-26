@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Button from '../atoms/Button';
 import Icon from '../atoms/Icon';
 import useCart from '../../hooks/useCart';
+import { useCountry } from '../../context/CountryContext';
 
 // The only interactive part of a ProductCard, split out so the card itself can
 // stay a server component. Keeping the cart subscription down here means a cart
@@ -14,6 +15,7 @@ import useCart from '../../hooks/useCart';
 // land on the button and not the link.
 function ProductCardActions({ product, isWishlisted = false, onToggleWishlist }) {
     const { addToCart, isInCart } = useCart();
+    const { productsAvailable } = useCountry();
     const hasVariants = Boolean(product.variants?.length);
     const inCart = isInCart(product.id);
     const hasDiscount = product.discountPercent > 0;
@@ -44,7 +46,11 @@ function ProductCardActions({ product, isWishlisted = false, onToggleWishlist })
                         </span>
                     )}
                 </div>
-                {comingSoon ? (
+                {!productsAvailable ? (
+                    <Button variant="outline" size="sm" disabled className="rounded-full px-4 py-1.5 text-xs">
+                        Unavailable
+                    </Button>
+                ) : comingSoon ? (
                     <Button variant="outline" size="sm" disabled className="rounded-full px-4 py-1.5 text-xs">
                         Coming Soon
                     </Button>

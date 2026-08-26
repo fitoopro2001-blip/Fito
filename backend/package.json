@@ -9,6 +9,7 @@
     "seed:admin": "node src/seed/seedSuperAdmin.js",
     "seed:content": "node src/seed/seedContent.js",
     "seed:consultation-plans": "node src/seed/seedConsultationPlans.js",
+    "seed:consultation-currency-prices": "node src/scripts/injectConsultationCurrencyPrices.js",
     "seed:referrals": "node src/seed/seedReferrals.js",
     "migrate:categories": "node src/scripts/migrateCategoriesToSlugs.js",
     "migrate:product-slugs": "node src/scripts/regenerateProductSlugs.js",

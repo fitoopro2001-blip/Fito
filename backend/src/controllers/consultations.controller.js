@@ -12,7 +12,8 @@ import { getCountryFromRequest, getCurrencyForCountry } from '../utils/geo.util.
 
 // Picks the plan price for the visitor's detected currency. Client-submitted
 // currency is never trusted (there isn't one) — currency is derived the same
-// way availability is for products, from the request's own country header.
+// way availability is for products, from the request's own detected country
+// (see getCountryFromRequest — an IP geolocation lookup, not a header read).
 // Falls back to PKR when the resolved currency isn't PKR but an admin hasn't
 // entered that currency's price yet (still 0) — never charges 0, and never
 // mislabels an unset value as SAR/USD.
@@ -108,7 +109,7 @@ export const createConsultation = asyncHandler(async (req, res) => {
             res.status(400);
             throw new Error('Invalid plan selected');
         }
-        const currency = getCurrencyForCountry(getCountryFromRequest(req));
+        const currency = getCurrencyForCountry(await getCountryFromRequest(req));
         const resolved = resolveConsultationPrice(planDoc, currency);
         const discountedPrice = computeDiscountedPrice(resolved.price, planDoc.discountPercent);
         plan = {

@@ -17,10 +17,15 @@ import { getCountryFromRequest, getCurrencyForCountry } from '../utils/geo.util.
 // Falls back to PKR when the resolved currency isn't PKR but an admin hasn't
 // entered that currency's price yet (still 0) — never charges 0, and never
 // mislabels an unset value as SAR/USD.
+// Each currency also carries its own discount percent, so the applicable one
+// is resolved here alongside the price rather than always reading the PKR
+// `discountPercent`.
 const resolveConsultationPrice = (planDoc, currency) => {
-    if (currency === 'SAR' && planDoc.priceSAR > 0) return { price: planDoc.priceSAR, currency: 'SAR' };
-    if (currency === 'USD' && planDoc.priceUSD > 0) return { price: planDoc.priceUSD, currency: 'USD' };
-    return { price: planDoc.price, currency: 'PKR' };
+    if (currency === 'SAR' && planDoc.priceSAR > 0)
+        return { price: planDoc.priceSAR, currency: 'SAR', discountPercent: planDoc.discountPercentSAR ?? 0 };
+    if (currency === 'USD' && planDoc.priceUSD > 0)
+        return { price: planDoc.priceUSD, currency: 'USD', discountPercent: planDoc.discountPercentUSD ?? 0 };
+    return { price: planDoc.price, currency: 'PKR', discountPercent: planDoc.discountPercent ?? 0 };
 };
 
 // Multipart bodies arrive as strings, so JSON fields need parsing. Returns
@@ -111,13 +116,13 @@ export const createConsultation = asyncHandler(async (req, res) => {
         }
         const currency = getCurrencyForCountry(await getCountryFromRequest(req));
         const resolved = resolveConsultationPrice(planDoc, currency);
-        const discountedPrice = computeDiscountedPrice(resolved.price, planDoc.discountPercent);
+        const discountedPrice = computeDiscountedPrice(resolved.price, resolved.discountPercent);
         plan = {
             id: planDoc._id,
             label: planDoc.label,
             durationMonths: planDoc.durationMonths,
             price: discountedPrice,
-            originalPrice: planDoc.discountPercent > 0 ? resolved.price : undefined,
+            originalPrice: resolved.discountPercent > 0 ? resolved.price : undefined,
             currency: resolved.currency,
         };
     }

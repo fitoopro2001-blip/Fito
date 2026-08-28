@@ -25,6 +25,11 @@ const cleanFeatures = (features) =>
 // yet entered").
 const isValidOptionalPrice = (value) => value === undefined || (typeof value === 'number' && value >= 0);
 
+// Discount percents (one per currency) are optional per-call and always
+// bounded 0–100 when present.
+const isValidOptionalDiscount = (value) =>
+    value === undefined || (typeof value === 'number' && value >= 0 && value <= 100);
+
 // GET /api/consultation-plans and GET /api/admin/consultation-plans — same
 // shape for both; the admin route additionally requires protectAdmin (see
 // route). Optional ?goal= scopes to one goal (used by the admin pricing page).
@@ -48,7 +53,7 @@ export const listConsultationPlans = asyncHandler(async (req, res) => {
 
 // POST /api/admin/consultation-plans — creates a new program under a goal.
 export const createConsultationPlan = asyncHandler(async (req, res) => {
-    const { goal, label, durationMonths, price, priceSAR, priceUSD, discountPercent, features, isPaused } = req.body;
+    const { goal, label, durationMonths, price, priceSAR, priceUSD, discountPercent, discountPercentSAR, discountPercentUSD, features, isPaused } = req.body;
 
     if (!CONSULTATION_GOALS.includes(goal)) {
         res.status(400);
@@ -74,7 +79,7 @@ export const createConsultationPlan = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('USD price must be a non-negative number');
     }
-    if (discountPercent !== undefined && (typeof discountPercent !== 'number' || discountPercent < 0 || discountPercent > 100)) {
+    if (![discountPercent, discountPercentSAR, discountPercentUSD].every(isValidOptionalDiscount)) {
         res.status(400);
         throw new Error('Discount percent must be between 0 and 100');
     }
@@ -87,6 +92,8 @@ export const createConsultationPlan = asyncHandler(async (req, res) => {
         priceSAR: priceSAR ?? 0,
         priceUSD: priceUSD ?? 0,
         discountPercent: discountPercent ?? 0,
+        discountPercentSAR: discountPercentSAR ?? 0,
+        discountPercentUSD: discountPercentUSD ?? 0,
         features: cleanFeatures(features),
         isPaused: isPaused ?? false,
     });
@@ -96,7 +103,7 @@ export const createConsultationPlan = asyncHandler(async (req, res) => {
 
 // PATCH /api/admin/consultation-plans/:id
 export const updateConsultationPlan = asyncHandler(async (req, res) => {
-    const { label, durationMonths, price, priceSAR, priceUSD, discountPercent, features, isPaused } = req.body;
+    const { label, durationMonths, price, priceSAR, priceUSD, discountPercent, discountPercentSAR, discountPercentUSD, features, isPaused } = req.body;
 
     const plan = await ConsultationPlan.findById(req.params.id);
     if (!plan) {
@@ -139,12 +146,17 @@ export const updateConsultationPlan = asyncHandler(async (req, res) => {
         }
         plan.priceUSD = priceUSD;
     }
-    if (discountPercent !== undefined) {
-        if (typeof discountPercent !== 'number' || discountPercent < 0 || discountPercent > 100) {
+    for (const [field, value] of [
+        ['discountPercent', discountPercent],
+        ['discountPercentSAR', discountPercentSAR],
+        ['discountPercentUSD', discountPercentUSD],
+    ]) {
+        if (value === undefined) continue;
+        if (!isValidOptionalDiscount(value)) {
             res.status(400);
             throw new Error('Discount percent must be between 0 and 100');
         }
-        plan.discountPercent = discountPercent;
+        plan[field] = value;
     }
     if (features !== undefined) plan.features = cleanFeatures(features);
     if (isPaused !== undefined) plan.isPaused = Boolean(isPaused);

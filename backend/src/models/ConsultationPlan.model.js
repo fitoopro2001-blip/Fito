@@ -21,9 +21,14 @@ const consultationPlanSchema = new mongoose.Schema(
         price: { type: Number, required: true, min: 0 },
         priceSAR: { type: Number, default: 0, min: 0 },
         priceUSD: { type: Number, default: 0, min: 0 },
-        // Percentage off `price`, shown as a struck-through original price on
-        // the app. 0 means no discount.
+        // Percentage off the matching per-currency price, shown as a
+        // struck-through original price on the app. Entered independently per
+        // currency (never derived from one another) — `discountPercent`
+        // applies to `price` (PKR), `discountPercentSAR` to `priceSAR`,
+        // `discountPercentUSD` to `priceUSD`. 0 means no discount.
         discountPercent: { type: Number, default: 0, min: 0, max: 100 },
+        discountPercentSAR: { type: Number, default: 0, min: 0, max: 100 },
+        discountPercentUSD: { type: Number, default: 0, min: 0, max: 100 },
         // Short bullet points describing what's included — no images, per
         // product decision; the app already owns imagery at the goal level.
         features: [{ type: String, trim: true }],

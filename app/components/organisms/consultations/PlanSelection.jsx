@@ -39,8 +39,8 @@ export default function PlanSelection({
         {plans.map((plan) => {
 
           const isSelected = selectedPlan?.id === plan.id;
-          const hasDiscount = plan.discountPercent > 0;
           const resolved = resolvePlanPrice(plan, currency);
+          const hasDiscount = resolved.discountPercent > 0;
           const chargedPrice = resolved.discountedPrice;
           const isPaused = Boolean(plan.isPaused);
 
@@ -121,7 +121,7 @@ export default function PlanSelection({
                     </div>
                     {hasDiscount && (
                       <span className="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-success/10 text-success whitespace-nowrap">
-                        {plan.discountPercent}% off
+                        {resolved.discountPercent}% off
                       </span>
                     )}
                   </div>

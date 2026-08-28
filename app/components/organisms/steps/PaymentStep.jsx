@@ -77,8 +77,8 @@ export default function PaymentStep({
 }) {
   const { currency } = useCountry();
   const uploads = formData.uploads || {};
-  const hasDiscount = selectedPlan?.discountPercent > 0;
   const resolved = selectedPlan ? resolvePlanPrice(selectedPlan, currency) : null;
+  const hasDiscount = (resolved?.discountPercent ?? 0) > 0;
   const chargedPrice = resolved?.discountedPrice ?? null;
 
   const handlePaymentUpload = (files) => {
@@ -132,7 +132,7 @@ export default function PaymentStep({
 
           {hasDiscount && (
             <span className="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-success/10 text-success whitespace-nowrap">
-              {selectedPlan.discountPercent}% off
+              {resolved.discountPercent}% off
             </span>
           )}
         </div>

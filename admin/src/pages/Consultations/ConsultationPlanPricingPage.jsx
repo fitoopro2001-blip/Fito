@@ -14,6 +14,15 @@ import {
 
 const apiError = (err, fallback) => err?.response?.data?.message || fallback;
 
+// One column per currency. Price and discount are both entered manually per
+// currency — never derived from one another or via exchange rate. Mirrors
+// backend/src/utils/serializers.js#toPublicConsultationPlan.
+const CURRENCY_FIELDS = [
+    { code: 'PKR', prefix: 'Rs.', priceKey: 'price', discountKey: 'discountPercent' },
+    { code: 'SAR', prefix: 'SAR', priceKey: 'priceSAR', discountKey: 'discountPercentSAR' },
+    { code: 'USD', prefix: 'USD', priceKey: 'priceUSD', discountKey: 'discountPercentUSD' },
+];
+
 const emptyPlan = () => ({
     key: `new-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     isNew: true,
@@ -23,12 +32,17 @@ const emptyPlan = () => ({
     priceSAR: 0,
     priceUSD: 0,
     discountPercent: 0,
+    discountPercentSAR: 0,
+    discountPercentUSD: 0,
     features: [''],
     isPaused: false,
 });
 
-const finalPrice = (plan) =>
-    plan.discountPercent > 0 ? Math.round(plan.price * (1 - plan.discountPercent / 100)) : plan.price;
+// Matches computeDiscountedPrice on the backend (rounded to 2 decimals).
+const discountedPrice = (price, discountPercent) => {
+    const base = price || 0;
+    return discountPercent > 0 ? Math.round(base * (1 - discountPercent / 100) * 100) / 100 : base;
+};
 
 export default function ConsultationPlanPricingPage() {
     const navigate = useNavigate();
@@ -137,7 +151,11 @@ export default function ConsultationPlanPricingPage() {
             if (p.price === null || p.price === undefined || p.price < 0) return 'PKR price must be a non-negative number';
             if (p.priceSAR === null || p.priceSAR === undefined || p.priceSAR < 0) return 'SAR price must be a non-negative number';
             if (p.priceUSD === null || p.priceUSD === undefined || p.priceUSD < 0) return 'USD price must be a non-negative number';
-            if (p.discountPercent < 0 || p.discountPercent > 100) return 'Discount must be between 0 and 100';
+            for (const { code, discountKey } of CURRENCY_FIELDS) {
+                const pct = p[discountKey];
+                if (pct === null || pct === undefined || pct < 0 || pct > 100)
+                    return `${code} discount must be between 0 and 100`;
+            }
         }
         return null;
     };
@@ -161,7 +179,9 @@ export default function ConsultationPlanPricingPage() {
                         price: p.price,
                         priceSAR: p.priceSAR ?? 0,
                         priceUSD: p.priceUSD ?? 0,
-                        discountPercent: p.discountPercent,
+                        discountPercent: p.discountPercent ?? 0,
+                        discountPercentSAR: p.discountPercentSAR ?? 0,
+                        discountPercentUSD: p.discountPercentUSD ?? 0,
                         features: p.features,
                         isPaused: p.isPaused ?? false,
                     };
@@ -239,71 +259,54 @@ export default function ConsultationPlanPricingPage() {
                                         Paused — shown as &quot;Coming Soon&quot; and blurred on the app; customers can&apos;t select or buy it.
                                     </div>
                                 )}
-                                <div className="grid grid-cols-2 gap-3 mb-3">
-                                    <div>
-                                        <div className="text-xs text-gray-500 mb-1">Duration (months)</div>
-                                        <InputNumber
-                                            min={1}
-                                            value={plan.durationMonths}
-                                            onChange={(v) => updatePlan(plan.key, { durationMonths: v })}
-                                            className="w-full"
-                                        />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs text-gray-500 mb-1">Discount (%)</div>
-                                        <InputNumber
-                                            min={0}
-                                            max={100}
-                                            value={plan.discountPercent}
-                                            onChange={(v) => updatePlan(plan.key, { discountPercent: v ?? 0 })}
-                                            className="w-full"
-                                        />
-                                    </div>
+                                <div className="mb-3">
+                                    <div className="text-xs text-gray-500 mb-1">Duration (months)</div>
+                                    <InputNumber
+                                        min={1}
+                                        value={plan.durationMonths}
+                                        onChange={(v) => updatePlan(plan.key, { durationMonths: v })}
+                                        className="w-full sm:w-1/2"
+                                    />
                                 </div>
 
-                                <div className="text-xs text-gray-500 mb-1">
-                                    Pricing — entered manually per currency, no automatic conversion
+                                <div className="text-xs text-gray-500 mb-2">
+                                    Pricing &amp; discounts — entered manually per currency, no automatic conversion
                                 </div>
-                                <div className="grid grid-cols-3 gap-3 mb-3">
-                                    <div>
-                                        <div className="text-xs text-gray-500 mb-1">Price (PKR)</div>
-                                        <InputNumber
-                                            min={0}
-                                            value={plan.price}
-                                            onChange={(v) => updatePlan(plan.key, { price: v ?? 0 })}
-                                            className="w-full"
-                                        />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs text-gray-500 mb-1">Price (SAR)</div>
-                                        <InputNumber
-                                            min={0}
-                                            value={plan.priceSAR}
-                                            onChange={(v) => updatePlan(plan.key, { priceSAR: v ?? 0 })}
-                                            className="w-full"
-                                        />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs text-gray-500 mb-1">Price (USD)</div>
-                                        <InputNumber
-                                            min={0}
-                                            value={plan.priceUSD}
-                                            onChange={(v) => updatePlan(plan.key, { priceUSD: v ?? 0 })}
-                                            className="w-full"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="text-sm text-gray-500 mb-4">
-                                    Final price:{' '}
-                                    <span className="font-semibold text-gray-800">
-                                        Rs. {finalPrice(plan).toLocaleString('en-US')}
-                                    </span>
-                                    {plan.discountPercent > 0 && (
-                                        <Tag color="green" className="ml-2">
-                                            {plan.discountPercent}% off
-                                        </Tag>
-                                    )}
+                                <div className="grid grid-cols-3 gap-3 mb-4">
+                                    {CURRENCY_FIELDS.map(({ code, prefix, priceKey, discountKey }) => {
+                                        const price = plan[priceKey] ?? 0;
+                                        const pct = plan[discountKey] ?? 0;
+                                        const final = discountedPrice(price, pct);
+                                        return (
+                                            <div key={code} className="rounded-lg border border-gray-100 bg-gray-50 p-2">
+                                                <div className="text-xs font-semibold text-gray-600 mb-2">{code}</div>
+                                                <div className="text-xs text-gray-500 mb-1">Price</div>
+                                                <InputNumber
+                                                    min={0}
+                                                    value={price}
+                                                    onChange={(v) => updatePlan(plan.key, { [priceKey]: v ?? 0 })}
+                                                    className="w-full"
+                                                />
+                                                <div className="text-xs text-gray-500 mt-2 mb-1">Discount (%)</div>
+                                                <InputNumber
+                                                    min={0}
+                                                    max={100}
+                                                    value={pct}
+                                                    onChange={(v) => updatePlan(plan.key, { [discountKey]: v ?? 0 })}
+                                                    className="w-full"
+                                                />
+                                                <div className="text-xs text-gray-500 mt-2">
+                                                    Final:{' '}
+                                                    <span className="font-semibold text-gray-800">
+                                                        {prefix} {final.toLocaleString('en-US')}
+                                                    </span>
+                                                    {pct > 0 && (
+                                                        <span className="text-green-600 font-medium ml-1">({pct}% off)</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
 
                                 <div className="text-xs text-gray-500 mb-2">What's included</div>

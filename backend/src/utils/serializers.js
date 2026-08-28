@@ -164,10 +164,14 @@ export const toPublicConsultationPlan = (plan) => ({
     price: plan.price,
     priceSAR: plan.priceSAR ?? 0,
     priceUSD: plan.priceUSD ?? 0,
+    // Each currency carries its own discount percent (see ConsultationPlan
+    // model) — never share one across currencies here.
     discountPercent: plan.discountPercent ?? 0,
+    discountPercentSAR: plan.discountPercentSAR ?? 0,
+    discountPercentUSD: plan.discountPercentUSD ?? 0,
     discountedPrice: computeDiscountedPrice(plan.price, plan.discountPercent ?? 0),
-    discountedPriceSAR: computeDiscountedPrice(plan.priceSAR ?? 0, plan.discountPercent ?? 0),
-    discountedPriceUSD: computeDiscountedPrice(plan.priceUSD ?? 0, plan.discountPercent ?? 0),
+    discountedPriceSAR: computeDiscountedPrice(plan.priceSAR ?? 0, plan.discountPercentSAR ?? 0),
+    discountedPriceUSD: computeDiscountedPrice(plan.priceUSD ?? 0, plan.discountPercentUSD ?? 0),
     features: plan.features ?? [],
     isPaused: plan.isPaused ?? false,
 });

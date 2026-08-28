@@ -35,6 +35,8 @@ export default function useConsultationPlans() {
           priceSAR: plan.priceSAR,
           priceUSD: plan.priceUSD,
           discountPercent: plan.discountPercent,
+          discountPercentSAR: plan.discountPercentSAR,
+          discountPercentUSD: plan.discountPercentUSD,
           discountedPrice: plan.discountedPrice,
           discountedPriceSAR: plan.discountedPriceSAR,
           discountedPriceUSD: plan.discountedPriceUSD,

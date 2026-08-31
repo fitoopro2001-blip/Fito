@@ -3,7 +3,7 @@
 // otherwise canonicals and OG images point at localhost.
 export const SITE_NAME = 'Fitoo';
 export const SITE_TAGLINE = 'Premium supplements and personalized diet consultation';
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://fitoo.pro').replace(
     /\/$/,
     ''
 );

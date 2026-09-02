@@ -4,6 +4,8 @@ import BodyRecompositionForm from "../components/organisms/forms/BodyRecompositi
 import PCOSForm from "../components/organisms/forms/PCOSForm";
 import MotherWellnessForm from "../components/organisms/forms/MotherWellnessForm";
 import DiabetesForm from "../components/organisms/forms/DiabetesForm";
+import HomeTrainingForm from "../components/organisms/forms/HomeTrainingForm";
+import OfficeConsultationForm from "../components/organisms/forms/OfficeConsultationForm";
 
 import fatLossImage from "../assets/images/fat-loss.webp";
 import muscleGainImage from "../assets/images/muscle-gain.webp";
@@ -343,6 +345,109 @@ export const CONSULTATION_GOALS = [
           "Bi-weekly check-ins (12 total)",
           "Unlimited plan revisions",
           "Priority support, 7 days a week",
+        ],
+      },
+    ],
+  },
+  {
+    // One-on-One Home Training (Lahore). Launched paused — every plan below
+    // has isPaused: true, so the flow shows them blurred as "Coming Soon"
+    // and they can't be selected/bought. Real plans + pricing are
+    // admin-managed (see the admin "Manage Pricing" page); this static list
+    // is only the pre-fetch fallback. Uses the fat-loss image as a
+    // placeholder until dedicated art is supplied.
+    id: "home-training",
+    title: "Home Training",
+    shortDescription: "One-on-one training with a certified coach at your home in Lahore.",
+    icon: "🏠",
+    image: fatLossImage,
+    color: "#F97316",
+    component: HomeTrainingForm,
+    plans: [
+      {
+        id: "12-days",
+        durationMonths: 1,
+        label: "12 Days / Month",
+        price: 29999,
+        image: fatLossImage,
+        isPaused: true,
+        bestFor: "Best for building a consistent routine with a trainer three days a week.",
+        features: [
+          "Certified trainer at your home",
+          "12 one-on-one sessions per month",
+          "Personalized workout plan (goal-based)",
+          "Form correction and technique coaching",
+          "Progress and body measurement tracking",
+          "Flexible scheduling around you",
+          "WhatsApp coaching support",
+        ],
+      },
+      {
+        id: "16-days",
+        durationMonths: 1,
+        label: "16 Days / Month",
+        price: 39999,
+        image: fatLossImage,
+        isPaused: true,
+        badge: "Most Popular",
+        bestFor: "Best for faster progress with four supervised sessions a week.",
+        features: [
+          "Certified trainer at your home",
+          "16 one-on-one sessions per month",
+          "Personalized workout plan (goal-based)",
+          "Form correction and technique coaching",
+          "Progress and body measurement tracking",
+          "Flexible scheduling around you",
+          "WhatsApp coaching support",
+        ],
+      },
+      {
+        id: "20-days",
+        durationMonths: 1,
+        label: "20 Days / Month",
+        price: 49999,
+        image: fatLossImage,
+        isPaused: true,
+        badge: "Best Value",
+        bestFor: "Best for near-daily accountability and the quickest results.",
+        features: [
+          "Certified trainer at your home",
+          "20 one-on-one sessions per month",
+          "Personalized workout plan (goal-based)",
+          "Form correction and technique coaching",
+          "Progress and body measurement tracking",
+          "Flexible scheduling around you",
+          "Priority WhatsApp coaching support",
+        ],
+      },
+    ],
+  },
+  {
+    // Personalized Consultation at the FITOO office. Launched paused — the
+    // single plan below has isPaused: true ("Coming Soon"). Uses the
+    // fat-loss image as a placeholder until dedicated art is supplied.
+    id: "office-consultation",
+    title: "Office Consultation",
+    shortDescription: "A personalized in-person consultation at the FITOO office.",
+    icon: "🏢",
+    image: fatLossImage,
+    color: "#0EA5E9",
+    component: OfficeConsultationForm,
+    plans: [
+      {
+        id: "single",
+        durationMonths: 1,
+        label: "Single Consultation",
+        price: 4999,
+        image: fatLossImage,
+        isPaused: true,
+        bestFor: "Best for a one-time expert assessment and a clear plan to move forward.",
+        features: [
+          "In-person consultation at the FITOO office",
+          "Personalized fitness, nutrition and lifestyle guidance",
+          "Body composition and goal assessment",
+          "Custom program direction and next steps",
+          "Follow-up recommendations",
         ],
       },
     ],

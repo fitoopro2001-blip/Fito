@@ -233,6 +233,74 @@ const PLANS = [
             'Regular follow-ups',
         ],
     },
+
+    // 7. One-on-One Home Training (Lahore) — seeded paused ("Coming Soon")
+    // until in-home training operations go live.
+    {
+        goal: 'home-training',
+        label: '12 Days / Month',
+        durationMonths: 1,
+        price: 29999,
+        isPaused: true,
+        features: [
+            'Certified trainer at your home',
+            '12 one-on-one sessions per month',
+            'Personalized workout plan (goal-based)',
+            'Form correction and technique coaching',
+            'Progress and body measurement tracking',
+            'Flexible scheduling around you',
+            'WhatsApp coaching support',
+        ],
+    },
+    {
+        goal: 'home-training',
+        label: '16 Days / Month',
+        durationMonths: 1,
+        price: 39999,
+        isPaused: true,
+        features: [
+            'Certified trainer at your home',
+            '16 one-on-one sessions per month',
+            'Personalized workout plan (goal-based)',
+            'Form correction and technique coaching',
+            'Progress and body measurement tracking',
+            'Flexible scheduling around you',
+            'WhatsApp coaching support',
+        ],
+    },
+    {
+        goal: 'home-training',
+        label: '20 Days / Month',
+        durationMonths: 1,
+        price: 49999,
+        isPaused: true,
+        features: [
+            'Certified trainer at your home',
+            '20 one-on-one sessions per month',
+            'Personalized workout plan (goal-based)',
+            'Form correction and technique coaching',
+            'Progress and body measurement tracking',
+            'Flexible scheduling around you',
+            'Priority WhatsApp coaching support',
+        ],
+    },
+
+    // 8. Personalized Consultation at FITOO Office — seeded paused
+    // ("Coming Soon"). Single in-person session, priced per consultation.
+    {
+        goal: 'office-consultation',
+        label: 'Single Consultation',
+        durationMonths: 1,
+        price: 4999,
+        isPaused: true,
+        features: [
+            'In-person consultation at the FITOO office',
+            'Personalized fitness, nutrition and lifestyle guidance',
+            'Body composition and goal assessment',
+            'Custom program direction and next steps',
+            'Follow-up recommendations',
+        ],
+    },
 ];
 
 const run = async () => {

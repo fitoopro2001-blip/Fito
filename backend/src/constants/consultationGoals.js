@@ -7,4 +7,9 @@ export const CONSULTATION_GOALS = Object.freeze([
     'pcos',
     'mother-wellness',
     'diabetes',
+    // One-on-One Home Training and Personalized Office Consultation — see
+    // FITOO_Website_Booking_Forms_Developer_Handoff. Launched paused (all
+    // default plans have isPaused: true), so they show as "Coming Soon".
+    'home-training',
+    'office-consultation',
 ]);

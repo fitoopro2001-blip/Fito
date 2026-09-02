@@ -81,4 +81,19 @@ export const GOAL_DATA_SCHEMAS = {
     diabetesType: Yup.string().required("Please select your diabetes type"),
     fastingSugar: numberField("fasting blood sugar"),
   }),
+  "home-training": Yup.object({
+    lahoreArea: Yup.string().trim().required("Please tell us your area in Lahore"),
+    trainingAddress: Yup.string().trim().required("Please enter the training address"),
+    primaryGoal: Yup.string().required("Please select your primary goal"),
+    fitnessLevel: Yup.string().required("Please select your current fitness level"),
+    emergencyContactName: Yup.string().trim().required("Emergency contact name is required"),
+    emergencyContactNumber: Yup.string().trim().required("Emergency contact number is required"),
+  }),
+  "office-consultation": Yup.object({
+    city: Yup.string().trim().required("City is required"),
+    consultationType: Yup.string().required("Please select what the consultation is for"),
+    activityLevel: Yup.string().required("Please select your activity level"),
+    mainConcern: Yup.string().trim().required("Please describe your main concern"),
+    preferredDate: Yup.string().required("Please pick a preferred consultation date"),
+  }),
 };

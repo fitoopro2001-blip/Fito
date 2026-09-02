@@ -6,6 +6,8 @@ export const CONSULTATION_GOALS = [
     { id: 'pcos', title: 'PCOS', icon: '🌸' },
     { id: 'mother-wellness', title: 'Busy Moms', icon: '🤱' },
     { id: 'diabetes', title: 'Diabetic Patients', icon: '🩸' },
+    { id: 'home-training', title: 'Home Training', icon: '🏠' },
+    { id: 'office-consultation', title: 'Office Consultation', icon: '🏢' },
 ];
 
 export const CONSULTATION_STATUSES = ['pending', 'in_review', 'completed'];

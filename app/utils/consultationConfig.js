@@ -13,6 +13,9 @@ import bodyRecompositionImage from "../assets/images/body-recomposition.webp";
 import pcosImage from "../assets/images/PCOS.webp";
 import motherWellnessImage from "../assets/images/mother-wellness-program.webp";
 import diabeticPatientsImage from "../assets/images/diabetic-patients.webp";
+import homeTrainingImage from "../assets/images/home.webp";
+import officeConsultationImage from "../assets/images/physical.webp";
+
 
 // Placeholder pricing/features per goal — edit freely once real numbers are
 // confirmed. Each goal gets its own 1/3/6 month plans (id, price in PKR,
@@ -360,7 +363,7 @@ export const CONSULTATION_GOALS = [
     title: "Home Training",
     shortDescription: "One-on-one training with a certified coach at your home in Lahore.",
     icon: "🏠",
-    image: fatLossImage,
+    image: homeTrainingImage,
     color: "#F97316",
     component: HomeTrainingForm,
     plans: [
@@ -430,7 +433,7 @@ export const CONSULTATION_GOALS = [
     title: "Office Consultation",
     shortDescription: "A personalized in-person consultation at the FITOO office.",
     icon: "🏢",
-    image: fatLossImage,
+    image: officeConsultationImage,
     color: "#0EA5E9",
     component: OfficeConsultationForm,
     plans: [

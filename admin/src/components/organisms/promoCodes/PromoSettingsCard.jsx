@@ -44,7 +44,7 @@ export default function PromoSettingsCard({ onSaved }) {
     return (
         <Card
             title="Promo Code Settings"
-            className="rounded-2xl border border-gray-100 shadow-sm mb-6"
+            className="rounded-2xl border border-gray-100 shadow-sm mb-6!"
         >
             {loading ? (
                 <Skeleton active paragraph={{ rows: 3 }} />
@@ -96,7 +96,7 @@ export default function PromoSettingsCard({ onSaved }) {
                         message="Codes already issued keep the percent, minimum and expiry they were issued with. These settings apply to codes issued from now on."
                     />
 
-                    <Button type="primary" loading={saving} onClick={handleSave}>
+                    <Button className='mt-4!' type="primary" loading={saving} onClick={handleSave}>
                         Save Settings
                     </Button>
                 </Form>

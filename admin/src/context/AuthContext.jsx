@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ROLES } from '../constants/roles';
 import { loginAdmin } from '../api/adminAuth.api';
+import { AUTH_EXPIRED_EVENT } from '../api/client';
 
 const AuthContext = createContext(null);
 
@@ -33,6 +34,18 @@ export function AuthProvider({ children }) {
     const logout = useCallback(() => {
         localStorage.removeItem(STORAGE_KEY);
         setUser(null);
+    }, []);
+
+    // When the API layer detects an expired/revoked session (401), drop the
+    // user so RequireAuth redirects to the login screen instead of leaving a
+    // stale dashboard mounted with no data.
+    useEffect(() => {
+        const handleExpired = () => {
+            localStorage.removeItem(STORAGE_KEY);
+            setUser(null);
+        };
+        window.addEventListener(AUTH_EXPIRED_EVENT, handleExpired);
+        return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleExpired);
     }, []);
 
     const value = useMemo(

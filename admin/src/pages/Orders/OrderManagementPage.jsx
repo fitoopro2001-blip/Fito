@@ -130,6 +130,14 @@ export default function OrderManagementPage() {
                                     </Descriptions.Item>
                                 </>
                             )}
+                            {viewing.discountAmount > 0 && (
+                                <>
+                                    <Descriptions.Item label="Subtotal">{`Rs. ${viewing.subtotal.toFixed(2)}`}</Descriptions.Item>
+                                    <Descriptions.Item label="Promo Code">
+                                        {`${viewing.promoCode?.code} (−${viewing.promoCode?.discountPercent}% = Rs. ${viewing.discountAmount.toFixed(2)})`}
+                                    </Descriptions.Item>
+                                </>
+                            )}
                             <Descriptions.Item label="Total">{`Rs. ${viewing.total.toFixed(2)}`}</Descriptions.Item>
                         </Descriptions>
 

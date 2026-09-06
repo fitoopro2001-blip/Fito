@@ -1,3 +1,5 @@
+import { PROMO_CODE_STATUS } from '../constants/promoCodeStatus.js';
+
 // Shared by Product and ConsultationPlan — `price` is always the raw,
 // admin-edited base price; this is the amount actually charged once a
 // discount is applied. Rounded to 2 decimals, matching the precision prices
@@ -34,6 +36,13 @@ export const toPublicOrder = (order) => ({
     orderNumber: order.orderNumber,
     user: order.user,
     items: order.items,
+    // Orders placed before promo codes existed have no subtotal stored —
+    // fall back to the total, which was the pre-discount amount back then.
+    subtotal: order.subtotal ?? order.total,
+    discountAmount: order.discountAmount ?? 0,
+    promoCode: order.promoCode?.code
+        ? { code: order.promoCode.code, discountPercent: order.promoCode.discountPercent }
+        : null,
     total: order.total,
     paymentMethod: order.paymentMethod,
     transactionId: order.transactionId,
@@ -233,6 +242,43 @@ export const toPublicReferralCommission = (commission) => ({
     sentAt: commission.sentAt,
     createdAt: commission.createdAt,
     updatedAt: commission.updatedAt,
+});
+
+// `owner`/`issuedFor`/`usedByUser` are only expanded when the calling
+// controller populated them (the admin list does; the app's own-codes list
+// doesn't need to).
+export const toPublicPromoCode = (promo) => ({
+    id: promo._id,
+    code: promo.code,
+    // Reported from the date rather than the stored field so a code reads as
+    // expired the moment it lapses, not once the lazy sweep flips it (see
+    // promoCode.util.js#expireStalePromoCodes).
+    status:
+        promo.status === PROMO_CODE_STATUS.ACTIVE && promo.expiresAt <= new Date()
+            ? PROMO_CODE_STATUS.EXPIRED
+            : promo.status,
+    discountPercent: promo.discountPercent,
+    minOrderTotal: promo.minOrderTotal ?? 0,
+    expiresAt: promo.expiresAt,
+    usedAt: promo.usedAt,
+    discountAmount: promo.discountAmount,
+    owner: promo.owner?.name ? { id: promo.owner._id, name: promo.owner.name, email: promo.owner.email } : undefined,
+    issuedFor: promo.issuedFor?.name
+        ? { id: promo.issuedFor._id, name: promo.issuedFor.name, email: promo.issuedFor.email }
+        : undefined,
+    usedOnOrder: promo.usedOnOrder?.orderNumber
+        ? { id: promo.usedOnOrder._id, orderNumber: promo.usedOnOrder.orderNumber }
+        : undefined,
+    createdAt: promo.createdAt,
+});
+
+export const toPublicPromoSettings = (settings) => ({
+    enabled: settings.enabled,
+    discountPercent: settings.discountPercent,
+    validityDays: settings.validityDays,
+    minOrderTotal: settings.minOrderTotal,
+    shareable: settings.shareable,
+    updatedAt: settings.updatedAt,
 });
 
 export const toPublicReview = (review) => ({

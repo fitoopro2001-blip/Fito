@@ -22,6 +22,9 @@ const COLOR_MAP = {
     alert: 'red',
     open: 'green',
     closed: 'default',
+    used: 'blue',
+    expired: 'default',
+    revoked: 'red',
 };
 
 const formatLabel = (value) =>

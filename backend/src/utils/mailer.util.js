@@ -73,6 +73,18 @@ export const sendOrderConfirmationEmail = async ({ to, order }) => {
             <p style="font-size: 20px; font-weight: bold; letter-spacing: 1px;">Order #${order.orderNumber}</p>
             <table style="width: 100%; border-collapse: collapse;">
                 ${itemsHtml}
+                ${
+                    order.discountAmount > 0
+                        ? `<tr>
+                    <td style="padding:6px 0; border-top:1px solid #eee;">Subtotal</td>
+                    <td style="padding:6px 0; text-align:right; border-top:1px solid #eee;">${formatCurrency(order.subtotal)}</td>
+                </tr>
+                <tr>
+                    <td style="padding:6px 0;">Promo ${order.promoCode?.code} (${order.promoCode?.discountPercent}% off)</td>
+                    <td style="padding:6px 0; text-align:right;">− ${formatCurrency(order.discountAmount)}</td>
+                </tr>`
+                        : ''
+                }
                 <tr>
                     <td style="padding:10px 0; font-weight:bold; border-top:1px solid #ddd;">Total</td>
                     <td style="padding:10px 0; font-weight:bold; text-align:right; border-top:1px solid #ddd;">${formatCurrency(order.total)}</td>
@@ -85,6 +97,41 @@ export const sendOrderConfirmationEmail = async ({ to, order }) => {
     });
     if (error) {
         const err = new Error(error.message || 'Failed to send order confirmation email');
+        err.statusCode = 502;
+        throw err;
+    }
+};
+
+const APP_PUBLIC_URL = process.env.APP_PUBLIC_URL || 'http://localhost:3000';
+
+// Sent to a referrer when someone who signed up with their referral code
+// verifies their account. `shareable` comes from the promo settings and only
+// changes the wording — the redemption rule itself is enforced server-side in
+// promoCode.util.js#resolvePromoCode.
+export const sendPromoCodeEmail = async ({ to, name, promo, referredName, shareable }) => {
+    const expiry = promo.expiresAt.toISOString().slice(0, 10);
+
+    const { error } = await getResend().emails.send({
+        from: FROM_ADDRESS,
+        to,
+        subject: `You earned ${promo.discountPercent}% off — Fito`,
+        html: `
+            <p>Hi ${name || 'there'},</p>
+            <p>${referredName ? `${referredName} just` : 'Someone just'} signed up with your referral code — here's your reward.</p>
+            <p style="font-size: 26px; font-weight: bold; letter-spacing: 3px;">${promo.code}</p>
+            <p>Use it at checkout for <strong>${promo.discountPercent}% off</strong> your order.</p>
+            <ul>
+                <li>Valid until <strong>${expiry}</strong></li>
+                <li>Can be used once — it expires as soon as it's redeemed</li>
+                ${promo.minOrderTotal > 0 ? `<li>Minimum order: ${formatCurrency(promo.minOrderTotal)}</li>` : ''}
+                ${shareable ? '' : '<li>Tied to your account — sign in with this email to redeem it</li>'}
+            </ul>
+            <p><a href="${APP_PUBLIC_URL}/shop">Start shopping</a></p>
+            <p style="margin-top:24px;">Keep sharing your referral code — every new signup earns you another one.</p>
+        `,
+    });
+    if (error) {
+        const err = new Error(error.message || 'Failed to send promo code email');
         err.statusCode = 502;
         throw err;
     }

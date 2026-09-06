@@ -13,6 +13,7 @@ import Button from '../../../components/atoms/Button';
 import Icon from '../../../components/atoms/Icon';
 import useCart from '../../../hooks/useCart';
 import { createOrder } from '../../../services/order.service';
+import { validatePromoCode } from '../../../services/promoCode.service';
 import { WHATSAPP_NUMBER } from '../../../utils/siteConfig';
 import { ALLOWED_IMAGE_TYPES, MAX_UPLOAD_SIZE_MB } from '../../../utils/uploadValidation';
 import { useCountry } from '../../../context/CountryContext';
@@ -28,6 +29,12 @@ function buildWhatsAppMessage(order) {
         `- ${item.name}${item.variantName ? ` (${item.variantName})` : ''} x${item.quantity} — PKR ${(item.price * item.quantity).toFixed(2)}`
     ),
     '',
+    ...(order.discountAmount
+      ? [
+          `Subtotal: PKR ${order.subtotal.toFixed(2)}`,
+          `Promo ${order.promoCode?.code} (${order.promoCode?.discountPercent}% off): -PKR ${order.discountAmount.toFixed(2)}`,
+        ]
+      : []),
     `Total: PKR ${order.total.toFixed(2)}`,
     `Payment: ${order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment (Bank Transfer)'}`,
     '',
@@ -52,6 +59,12 @@ export default function CheckoutPage() {
   const [error, setError] = useState('');
   const [order, setOrder] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [promoInput, setPromoInput] = useState('');
+  // Set once a code previews as valid — the server re-checks it when the
+  // order is placed, so this is display state, not the source of truth.
+  const [promo, setPromo] = useState(null);
+  const [promoError, setPromoError] = useState('');
+  const [applyingPromo, setApplyingPromo] = useState(false);
 
   if (!productsAvailable) {
     return <NotAvailableNotice />;
@@ -59,6 +72,38 @@ export default function CheckoutPage() {
 
   const updateShipping = (field) => (e) =>
     setShipping((prev) => ({ ...prev, [field]: e.target.value }));
+
+  // Recomputed from the current cart rather than reusing the amount the
+  // preview returned, so the summary stays right if the cart changes after
+  // the code was applied. The server does the same sum on its own items.
+  const discountAmount = promo
+    ? Math.round(totalPrice * (promo.discountPercent / 100) * 100) / 100
+    : 0;
+  const payableTotal = Math.round((totalPrice - discountAmount) * 100) / 100;
+
+  const handleApplyPromo = async () => {
+    if (!promoInput.trim()) return;
+    setApplyingPromo(true);
+    setPromoError('');
+    try {
+      const result = await validatePromoCode(promoInput.trim(), totalPrice);
+      setPromo(result);
+      message.success(`${result.discountPercent}% off applied`);
+    } catch (err) {
+      setPromo(null);
+      // The API's messages are already customer-facing ("already been used",
+      // "has expired", …) — show them rather than a generic failure.
+      setPromoError(err?.response?.data?.message || 'Could not apply this promo code.');
+    } finally {
+      setApplyingPromo(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromo(null);
+    setPromoInput('');
+    setPromoError('');
+  };
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
@@ -78,11 +123,13 @@ export default function CheckoutPage() {
           qty: item.quantity,
           price: item.price,
         })),
-        total: totalPrice,
+        // No `total` — the server sums the line items and applies the promo
+        // discount itself, so the amounts on the order are always its own.
         paymentMethod,
         transactionId,
         screenshotAttached: screenshot.length > 0,
         shipping,
+        promoCode: promo?.code,
       });
 
       setOrder({
@@ -90,6 +137,9 @@ export default function CheckoutPage() {
         orderNumber: createdOrder.orderNumber,
         placedAt: createdOrder.placedAt,
         items,
+        subtotal: createdOrder.subtotal,
+        discountAmount: createdOrder.discountAmount,
+        promoCode: createdOrder.promoCode,
         total: createdOrder.total,
         paymentMethod: createdOrder.paymentMethod,
         transactionId: createdOrder.transactionId,
@@ -101,6 +151,14 @@ export default function CheckoutPage() {
       if (err?.response?.status === 403) {
         setError('Not available in your country.');
         message.error('Not available in your country');
+      } else if (promo && err?.response?.data?.message) {
+        // The promo could have expired or been redeemed elsewhere between
+        // previewing it and placing the order — the server's message says
+        // which, and the code is dropped so the order can be retried.
+        setPromo(null);
+        setPromoError(err.response.data.message);
+        setError('Your promo code could no longer be applied. Review the total and try again.');
+        message.error(err.response.data.message);
       } else {
         setError('Something went wrong while placing your order. Please try again.');
         message.error('Failed to place order');
@@ -316,9 +374,62 @@ export default function CheckoutPage() {
                 </div>
               ))}
             </div>
+            <div className="border-t border-border-light pt-4 mb-4">
+              <label className="block text-sm text-text-secondary mb-1.5">Promo Code</label>
+              {promo ? (
+                <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-success/10 border border-success/30">
+                  <span className="text-sm text-text font-mono tracking-wider">{promo.code}</span>
+                  <span className="text-sm text-success">−{promo.discountPercent}%</span>
+                  <button
+                    type="button"
+                    onClick={handleRemovePromo}
+                    className="text-xs text-text-secondary underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    className="flex-1"
+                    placeholder="FITO-XXXXXX"
+                    value={promoInput}
+                    onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                    // Enter inside the checkout form would otherwise submit
+                    // the order instead of applying the code.
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Enter') return;
+                      e.preventDefault();
+                      handleApplyPromo();
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleApplyPromo}
+                    loading={applyingPromo}
+                    disabled={!promoInput.trim()}
+                  >
+                    Apply
+                  </Button>
+                </div>
+              )}
+              {promoError && <Text className="text-danger text-xs mt-1.5">{promoError}</Text>}
+            </div>
+
+            <div className="flex justify-between text-sm text-text-secondary mb-2">
+              <span>Subtotal</span>
+              <span>PKR {totalPrice.toFixed(2)}</span>
+            </div>
+            {promo && (
+              <div className="flex justify-between text-sm text-success mb-2">
+                <span>Promo discount ({promo.discountPercent}%)</span>
+                <span>− PKR {discountAmount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-text font-semibold text-lg border-t border-border-light pt-4 mb-6">
               <span>Total</span>
-              <span>PKR {totalPrice.toFixed(2)}</span>
+              <span>PKR {payableTotal.toFixed(2)}</span>
             </div>
             <Button type="submit" variant="primary" size="lg" fullWidth loading={submitting}>
               Place Order

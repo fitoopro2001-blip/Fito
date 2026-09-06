@@ -14,6 +14,7 @@ import {
     TagsOutlined,
     MailOutlined,
     GiftOutlined,
+    PercentageOutlined,
     IdcardOutlined,
     SolutionOutlined,
 } from '@ant-design/icons';
@@ -30,6 +31,7 @@ export default function Sidebar({ collapsed }) {
         { key: ROUTES.DASHBOARD, icon: <DashboardOutlined />, label: 'Dashboard' },
         isSuperAdmin && { key: ROUTES.USERS, icon: <TeamOutlined />, label: 'User Management' },
         isSuperAdmin && { key: ROUTES.REFERRALS, icon: <GiftOutlined />, label: 'Referral Management' },
+        isSuperAdmin && { key: ROUTES.PROMO_CODES, icon: <PercentageOutlined />, label: 'Promo Codes' },
         { key: ROUTES.CONSULTATIONS, icon: <MedicineBoxOutlined />, label: 'Consultation Management' },
         { key: ROUTES.PRODUCTS, icon: <ShoppingOutlined />, label: 'Product Management' },
         { key: ROUTES.CATEGORIES, icon: <TagsOutlined />, label: 'Category Management' },

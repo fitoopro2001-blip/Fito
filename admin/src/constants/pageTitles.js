@@ -7,6 +7,8 @@ export const PAGE_TITLES = [
     { path: ROUTES.CONSULTATION_PRICING, title: 'Consultation Plan Pricing' },
     { path: ROUTES.DASHBOARD, title: 'Dashboard' },
     { path: ROUTES.USERS, title: 'User Management' },
+    { path: ROUTES.REFERRALS, title: 'Referral Management' },
+    { path: ROUTES.PROMO_CODES, title: 'Promo Code Management' },
     { path: ROUTES.CONSULTATIONS, title: 'Consultation Management' },
     { path: ROUTES.PRODUCTS, title: 'Product Management' },
     { path: ROUTES.REVIEWS, title: 'Review Management' },

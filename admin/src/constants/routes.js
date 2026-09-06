@@ -5,6 +5,7 @@ export const ROUTES = {
     DASHBOARD: '/',
     USERS: '/users',
     REFERRALS: '/referrals',
+    PROMO_CODES: '/promo-codes',
     CONSULTATIONS: '/consultations',
     CONSULTATION_DETAIL: '/consultations/:id',
     CONSULTATION_PRICING: '/consultations/goal/:goalId/pricing',

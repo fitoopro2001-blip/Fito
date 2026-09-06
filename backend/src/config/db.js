@@ -1,4 +1,18 @@
+import dns from 'node:dns';
 import mongoose from 'mongoose';
+
+// A mongodb+srv:// URI makes Node resolve SRV *and* TXT records before it can
+// connect, and some home/ISP resolvers answer the SRV but silently drop the
+// TXT — which surfaces as "MongoDB connection error: queryTxt ETIMEOUT" with
+// no other explanation. Setting DNS_SERVERS locally (e.g. "1.1.1.1,8.8.8.8")
+// routes just those lookups around the broken resolver. Left unset — as it is
+// in production — Node's default resolver is used and nothing changes here.
+const dnsServers = process.env.DNS_SERVERS?.split(',')
+    .map((server) => server.trim())
+    .filter(Boolean);
+if (dnsServers?.length) {
+    dns.setServers(dnsServers);
+}
 
 // Serverless functions (Vercel) can invoke this on every cold start, and
 // multiple function instances can run concurrently — without caching the

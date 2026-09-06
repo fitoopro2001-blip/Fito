@@ -6,8 +6,10 @@ import mongoose from 'mongoose';
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const CODE_LENGTH = 8;
 
-const randomCode = () =>
-    Array.from(crypto.randomBytes(CODE_LENGTH))
+// Exported so promo codes (see promoCode.util.js) are drawn from the same
+// unambiguous alphabet — both are read off a screen and typed back in.
+export const randomCode = (length = CODE_LENGTH) =>
+    Array.from(crypto.randomBytes(length))
         .map((byte) => ALPHABET[byte % ALPHABET.length])
         .join('');
 

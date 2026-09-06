@@ -6,6 +6,7 @@ import { USER_STATUS } from '../constants/userStatus.js';
 import { OTP_PURPOSE } from '../constants/otpPurpose.js';
 import { issueOtp, checkOtp } from '../utils/otpFlow.util.js';
 import { toPublicUser } from '../utils/serializers.js';
+import { issueReferralPromoCode } from '../utils/promoCode.util.js';
 
 const OTP_FIELDS = '+otp.codeHash +otp.purpose +otp.expiresAt +otp.attempts';
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -89,6 +90,12 @@ export const verifyOtp = asyncHandler(async (req, res) => {
         res.status(403);
         throw new Error('Your account has been blocked. Please contact support.');
     }
+
+    // Rewards the referrer here rather than at registration: an unverified
+    // signup can still be discarded and replaced (see registerUser), so this
+    // is the first point the referral represents a real account. Never
+    // throws — see issueReferralPromoCode.
+    await issueReferralPromoCode(user);
 
     res.json({
         token: generateToken({ id: user._id }),
@@ -258,6 +265,11 @@ export const googleAuth = asyncHandler(async (req, res) => {
                 status: USER_STATUS.ACTIVE,
                 referredBy: referrer?._id ?? null,
             });
+
+            // Google has already verified the email, so unlike the OTP flow
+            // the account is real the moment it's created — reward the
+            // referrer right here.
+            await issueReferralPromoCode(user);
         }
     }
 

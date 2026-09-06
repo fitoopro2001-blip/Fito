@@ -19,6 +19,18 @@ const orderSchema = new mongoose.Schema(
                 price: { type: Number, required: true, min: 0 },
             },
         ],
+        // Line-item sum before any promo discount. `total` is what's actually
+        // charged (subtotal - discountAmount), so summing `total` across
+        // orders still reports revenue correctly.
+        subtotal: { type: Number, min: 0 },
+        discountAmount: { type: Number, default: 0, min: 0 },
+        // Snapshot of the redeemed code — kept on the order so the amount can
+        // be explained later even if the PromoCode doc is edited or removed.
+        promoCode: {
+            code: { type: String, uppercase: true, trim: true },
+            discountPercent: { type: Number, min: 0, max: 100 },
+            promo: { type: mongoose.Schema.Types.ObjectId, ref: 'PromoCode' },
+        },
         total: { type: Number, required: true, min: 0 },
         paymentMethod: { type: String, enum: ['cod', 'online'], required: true },
         transactionId: { type: String, trim: true },

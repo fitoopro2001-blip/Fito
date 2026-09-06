@@ -11,6 +11,7 @@ import SignupPage from './pages/Signup/SignupPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import UserManagementPage from './pages/Users/UserManagementPage';
 import ReferralManagementPage from './pages/Referrals/ReferralManagementPage';
+import PromoCodeManagementPage from './pages/PromoCodes/PromoCodeManagementPage';
 import ConsultationManagementPage from './pages/Consultations/ConsultationManagementPage';
 import ConsultationDetailPage from './pages/Consultations/ConsultationDetailPage';
 import ConsultationPlanPricingPage from './pages/Consultations/ConsultationPlanPricingPage';
@@ -95,6 +96,7 @@ export default function App() {
                   <Route element={<RequireSuperAdmin />}>
                     <Route path={ROUTES.USERS} element={<UserManagementPage />} />
                     <Route path={ROUTES.REFERRALS} element={<ReferralManagementPage />} />
+                    <Route path={ROUTES.PROMO_CODES} element={<PromoCodeManagementPage />} />
                     <Route path={ROUTES.REVIEWS} element={<ReviewManagementPage />} />
                     <Route path={ROUTES.ORDERS} element={<OrderManagementPage />} />
                   </Route>

@@ -1,6 +1,16 @@
 import { Suspense } from 'react';
 import ConsultationFlow from '@/components/organisms/consultations/ConsultationFlow';
 import FeaturedProducts from '../../../components/organisms/FeaturedProducts';
+import { buildMetadata } from '@/lib/seo';
+import { CONSULTATION_SEO } from '@/constants/seoContent';
+
+// Static copy — see constants/seoContent.js.
+export const metadata = buildMetadata({
+  title: CONSULTATION_SEO.title,
+  description: CONSULTATION_SEO.description,
+  keywords: CONSULTATION_SEO.keywords,
+  path: '/consultation',
+});
 
 export default function ConsultationPage() {
   return (

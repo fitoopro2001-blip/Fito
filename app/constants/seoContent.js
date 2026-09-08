@@ -35,10 +35,38 @@ export const ABOUT_SEO = {
     ],
 };
 
-export const PROGRAMS_SEO = {
-    title: 'Our Programs — Fat Loss, Muscle Gain, PCOS & More | Fitoo',
+export const CONSULTATION_SEO = {
+    title: 'Free Diet & Supplement Consultation | Fitoo Nutrition Experts',
     description:
-        'Explore Fitoo\'s coaching programs — fat loss, muscle gain, body recomposition, PCOS, Diabetes Management and Busy Moms — and book your plan.',
+        'Get a personalized diet & supplement plan from Fitoo\'s expert nutritionists. Book your free consultation today via WhatsApp and reach your fitness goals faster.',
+    keywords: [
+        'free diet consultation',
+        'supplement consultation',
+        'personalized diet plan',
+        'online nutritionist',
+        'whatsapp nutrition consultation',
+        'fitoo consultation',
+    ],
+};
+
+export const SHOP_SEO = {
+    title: 'Shop High-Protein Spreads & Supplements | Fitoo Pakistan',
+    description:
+        'Shop Fitoo\'s high-protein spreads & premium supplements online in Pakistan. Real ingredients, no added sugar. Fast delivery, easy checkout — order now!',
+    keywords: [
+        'high-protein spreads',
+        'protein spread pakistan',
+        'buy supplements online pakistan',
+        'premium supplements',
+        'no added sugar',
+        'fitoo shop',
+    ],
+};
+
+export const PROGRAMS_SEO = {
+    title: 'Fitoo Coaching Programs – Fat Loss, Muscle Gain, PCOS & More',
+    description:
+        'Choose a Fitoo program built by certified coaches & dietitians — Fat Loss, Muscle Gain, Body Recomposition, PCOS, Diabetes & Busy Moms. Book your plan today.',
     keywords: [
         'fitoo programs',
         'fat loss program',
@@ -48,6 +76,48 @@ export const PROGRAMS_SEO = {
         'Diabetes Management program',
         'busy moms program',
         'nutrition coaching programs',
+    ],
+};
+
+export const BLOG_SEO = {
+    title: 'Fitoo Blog | Nutrition Tips, Training Advice & Supplement Guides',
+    description:
+        'Explore the Fitoo Blog for expert nutrition science, training tips, and supplement guides to help you eat smarter, train harder, and reach your goals.',
+    keywords: [
+        'fitoo blog',
+        'nutrition tips',
+        'training advice',
+        'supplement guides',
+        'nutrition science',
+        'fitness blog pakistan',
+    ],
+};
+
+export const CAREERS_SEO = {
+    title: 'Careers at Fitoo | Join Our Team – Current Job Openings',
+    description:
+        'Explore career opportunities at Fitoo. Join our team in supplements, nutrition & fitness, and help us build a healthier future. View open roles now.',
+    keywords: [
+        'fitoo careers',
+        'fitoo jobs',
+        'nutrition jobs pakistan',
+        'supplement company careers',
+        'fitness industry jobs',
+        'job openings',
+    ],
+};
+
+export const CONTACT_SEO = {
+    title: 'Contact Us | Fitoo – Supplements & Diet Consultation',
+    description:
+        'Get in touch with Fitoo for order queries, product questions, or diet consultations. Message us online or chat directly on WhatsApp for a quick response.',
+    keywords: [
+        'contact fitoo',
+        'fitoo support',
+        'order queries',
+        'product questions',
+        'whatsapp fitoo',
+        'diet consultation contact',
     ],
 };
 

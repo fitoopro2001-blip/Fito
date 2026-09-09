@@ -14,6 +14,7 @@ import Divider from '@/components/atoms/Divider';
 import GoogleAuthButton from '@/components/molecules/GoogleAuthButton';
 import LegalModal from '@/components/molecules/LegalModal';
 import useAuth from '@/hooks/useAuth';
+import { trackEvent } from '@/lib/fbpixel';
 
 function RegisterForm() {
   const [loading, setLoading] = useState(false);
@@ -29,6 +30,8 @@ function RegisterForm() {
     setLoading(true);
     try {
       const result = await register(values);
+      // Meta Pixel — email sign-up completed.
+      trackEvent('CompleteRegistration', { content_name: 'email_signup', status: true });
       message.success(result?.message || 'Account created successfully!');
       router.push(`/verify-otp?email=${encodeURIComponent(values.email)}`);
     } catch (error) {
@@ -145,7 +148,14 @@ function RegisterForm() {
           <span className="text-text-muted text-sm">or sign up with</span>
         </Divider>
 
-        <GoogleAuthButton onAuthenticated={() => router.push('/')} referralCode={referralCode} />
+        <GoogleAuthButton
+          onAuthenticated={() => {
+            // Meta Pixel — Google sign-up from the register screen.
+            trackEvent('CompleteRegistration', { content_name: 'google_signup', status: true });
+            router.push('/');
+          }}
+          referralCode={referralCode}
+        />
 
         <div className="text-center mt-6 text-text-muted">
           Already have an account?{' '}

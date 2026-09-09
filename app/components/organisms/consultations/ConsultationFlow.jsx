@@ -8,6 +8,7 @@ import { message } from 'antd';
 import useConsultation from '../../../hooks/useConsultation';
 import useAuth from '../../../hooks/useAuth';
 import useConsultationPlans from '../../../hooks/useConsultationPlans';
+import { trackEvent } from '../../../lib/fbpixel';
 
 import GoalSelection from './GoalSelection';
 import PlanSelection from './PlanSelection';
@@ -159,6 +160,13 @@ export default function ConsultationFlow() {
     if (isFinalFormStep) {
       const success = await submitConsultation();
       if (success) {
+        // Meta Pixel — a paid consultation was submitted.
+        trackEvent('Lead', {
+          content_name: selectedGoalConfig?.title || selectedGoal,
+          content_category: 'consultation',
+          value: selectedPlan?.discountedPrice ?? selectedPlan?.price,
+          currency: 'PKR',
+        });
         next();
       } else {
         message.error('Something went wrong submitting your consultation. Please try again.');

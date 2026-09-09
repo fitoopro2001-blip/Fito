@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import useLocalStorageState from '../hooks/useLocalStorageState';
+import { trackEvent } from '../lib/fbpixel';
 
 const WishlistContext = createContext(null);
 
@@ -23,6 +24,14 @@ export function WishlistProvider({ children }) {
           slug: product.slug,
         },
       ]);
+
+      trackEvent('AddToWishlist', {
+        content_ids: [product.id],
+        content_name: product.name,
+        content_type: 'product',
+        value: product.discountedPrice ?? product.price,
+        currency: 'PKR',
+      });
     },
     [items, setItems]
   );

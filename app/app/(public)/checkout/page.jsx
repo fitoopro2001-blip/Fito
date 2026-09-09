@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { UploadOutlined } from '@ant-design/icons';
 import { message } from 'antd';
@@ -18,6 +18,7 @@ import { WHATSAPP_NUMBER } from '../../../utils/siteConfig';
 import { ALLOWED_IMAGE_TYPES, MAX_UPLOAD_SIZE_MB } from '../../../utils/uploadValidation';
 import { useCountry } from '../../../context/CountryContext';
 import NotAvailableNotice from '../../../components/molecules/NotAvailableNotice';
+import { trackEvent, newEventId } from '../../../lib/fbpixel';
 
 function buildWhatsAppMessage(order) {
   const lines = [
@@ -65,6 +66,22 @@ export default function CheckoutPage() {
   const [promo, setPromo] = useState(null);
   const [promoError, setPromoError] = useState('');
   const [applyingPromo, setApplyingPromo] = useState(false);
+
+  // Meta Pixel — checkout started. Fired once, when the page first loads with
+  // a non-empty cart; the ref stops it re-firing after the cart is cleared on
+  // a successful order.
+  const initiateCheckoutFired = useRef(false);
+  useEffect(() => {
+    if (initiateCheckoutFired.current || items.length === 0) return;
+    initiateCheckoutFired.current = true;
+    trackEvent('InitiateCheckout', {
+      content_ids: items.map((item) => item.id),
+      contents: items.map((item) => ({ id: item.id, quantity: item.quantity })),
+      num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+      value: totalPrice,
+      currency: 'PKR',
+    });
+  }, [items, totalPrice]);
 
   if (!productsAvailable) {
     return <NotAvailableNotice />;
@@ -145,6 +162,24 @@ export default function CheckoutPage() {
         transactionId: createdOrder.transactionId,
         shipping: createdOrder.shipping,
       });
+
+      // Meta Pixel — Purchase. `purchaseEventId` is generated here so the same
+      // value can be sent from the backend via the Conversions API later and
+      // Meta will de-duplicate the two.
+      const purchaseEventId = newEventId();
+      trackEvent(
+        'Purchase',
+        {
+          content_ids: items.map((item) => item.id),
+          contents: items.map((item) => ({ id: item.id, quantity: item.quantity })),
+          content_type: 'product',
+          num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+          value: createdOrder.total,
+          currency: 'PKR',
+          order_id: createdOrder.orderNumber || createdOrder.id,
+        },
+        { eventID: purchaseEventId }
+      );
 
       clearCart();
     } catch (err) {

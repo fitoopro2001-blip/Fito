@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { H2, H3, Text } from '../atoms/Typography';
@@ -18,6 +18,7 @@ import { getProduct } from '../../services/product.service';
 import formatCategory from '../../utils/formatCategory';
 import { useCountry } from '../../context/CountryContext';
 import NotAvailableNotice from '../molecules/NotAvailableNotice';
+import { trackEvent } from '../../lib/fbpixel';
 
 // Interactive half of the product page. The route's server component owns
 // metadata and structured data; everything stateful lives here.
@@ -54,6 +55,22 @@ export default function ProductTemplate({ id, initialProduct = null }) {
         setSelectedForProductId(product?.id);
         if (selectedVariant) setSelectedVariant(null);
     }
+
+    // Meta Pixel ViewContent — once per distinct product actually rendered.
+    useEffect(() => {
+        if (!product?.id) return;
+        trackEvent('ViewContent', {
+            content_ids: [product.id],
+            content_name: product.name,
+            content_type: 'product',
+            content_category: product.category,
+            value: product.discountedPrice ?? product.price,
+            currency: 'PKR',
+        });
+        // Intentionally keyed on the product id alone — one ViewContent per
+        // product, not per price/name re-render.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [product?.id]);
 
     if (!productsAvailable) {
         return <NotAvailableNotice />;

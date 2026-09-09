@@ -2,6 +2,7 @@ import './globals.css';
 import { Geist, Geist_Mono } from 'next/font/google';
 import MainLayout from '@/components/layouts/MainLayout';
 import JsonLd from '@/components/shared/JsonLd';
+import MetaPixel from '@/components/shared/MetaPixel';
 import { organizationJsonLd } from '@/lib/jsonld';
 import { buildMetadata } from '@/lib/seo';
 import { SITE_NAME } from '@/config/siteConfig';
@@ -48,6 +49,7 @@ export default async function RootLayout({ children }) {
         <link rel="dns-prefetch" href={API_ORIGIN} />
       </head>
       <body>
+        <MetaPixel />
         <JsonLd data={organizationJsonLd()} />
         <CountryProvider initialCountry={country}>
           <MainLayout>{children}</MainLayout>

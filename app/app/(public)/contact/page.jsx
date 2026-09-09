@@ -8,6 +8,7 @@ import TextArea from '../../../components/atoms/TextArea';
 import Button from '../../../components/atoms/Button';
 import Icon from '../../../components/atoms/Icon';
 import { CONTACT_EMAIL, WHATSAPP_NUMBER, WHATSAPP_DISPLAY } from '../../../utils/siteConfig';
+import { trackEvent } from '../../../lib/fbpixel';
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -24,6 +25,9 @@ export default function ContactPage() {
       return;
     }
     setError('');
+
+    // Meta Pixel — contact form submitted.
+    trackEvent('Contact', { content_name: 'contact_form' });
 
     const subject = encodeURIComponent(`Message from ${form.name} via Fitoo website`);
     const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`);

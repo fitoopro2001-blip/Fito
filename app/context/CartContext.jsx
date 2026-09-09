@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import useLocalStorageState from '../hooks/useLocalStorageState';
 import { useCountry } from './CountryContext';
+import { trackEvent } from '../lib/fbpixel';
 
 const CartContext = createContext(null);
 
@@ -55,6 +56,18 @@ export function CartProvider({ children }) {
           },
         ];
       setItems(next);
+
+      // Meta Pixel — fires for every successful add, including quantity bumps
+      // on a line already in the cart.
+      const unitPrice = variant?.price ?? product.discountedPrice ?? product.price;
+      trackEvent('AddToCart', {
+        content_ids: [product.id],
+        content_name: product.name,
+        content_type: 'product',
+        contents: [{ id: product.id, quantity }],
+        value: unitPrice * quantity,
+        currency: 'PKR',
+      });
     },
     [items, setItems, productsAvailable]
   );

@@ -1,5 +1,6 @@
 import './globals.css';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import MainLayout from '@/components/layouts/MainLayout';
 import JsonLd from '@/components/shared/JsonLd';
 import MetaPixel from '@/components/shared/MetaPixel';
@@ -55,6 +56,11 @@ export default async function RootLayout({ children }) {
           <MainLayout>{children}</MainLayout>
         </CountryProvider>
       </body>
+      {/* Loads after hydration and tracks App Router route changes itself.
+          Renders nothing when NEXT_PUBLIC_GA_ID is unset. */}
+      {process.env.NEXT_PUBLIC_GA_ID && (
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+      )}
     </html>
   );
 }

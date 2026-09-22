@@ -1,7 +1,7 @@
 // schema.org payloads. Rich results (price, stock, star rating) only show up if
 // the Product/Offer/AggregateRating shape is valid, so keep these in sync with
 // https://developers.google.com/search/docs/appearance/structured-data/product
-import { SITE_NAME, SITE_URL, CURRENCY, absoluteUrl } from '@/config/siteConfig';
+import { SITE_NAME, SITE_URL, CURRENCY, DEFAULT_OG_IMAGE, absoluteUrl } from '@/config/siteConfig';
 import imageUrl from '@/utils/imageUrl';
 import stripHtml from '@/utils/stripHtml';
 
@@ -134,6 +134,94 @@ export const websiteJsonLd = () => ({
   },
 });
 
+// Homepage graph: Organization + WebSite + founder Persons, cross-linked by
+// @id so Google resolves "who publishes this site" and "who founded it" as
+// the same entities referenced elsewhere (e.g. AboutPage's mainEntity).
+export const homeJsonLd = () => {
+  const orgId = absoluteUrl('/#organization');
+  const umerId = absoluteUrl('/#umer-shabbir');
+  const basitId = absoluteUrl('/#abdul-basit-khan');
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': orgId,
+        name: SITE_NAME,
+        url: absoluteUrl('/'),
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://www.fitoo.pro/_next/static/media/fitoo-logo.10mhihfns0xdb.svg',
+        },
+        description:
+          'Certified nutrition coaching and third-party lab-tested supplements, built by one team. Personalized plans for fat loss, muscle gain, PCOS and performance.',
+        sameAs: [
+          'https://www.facebook.com/share/1B2UCHJ3cB/',
+          'https://www.instagram.com/fitoo.pro',
+        ],
+        founder: [{ '@id': umerId }, { '@id': basitId }],
+        contactPoint: [
+          {
+            '@type': 'ContactPoint',
+            contactType: 'customer support',
+            telephone: '+92-324-1461893',
+            areaServed: 'PK',
+          },
+          {
+            '@type': 'ContactPoint',
+            contactType: 'sales',
+            telephone: '+92-309-1442268',
+            areaServed: 'PK',
+          },
+        ],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': absoluteUrl('/#website'),
+        url: absoluteUrl('/'),
+        name: SITE_NAME,
+        publisher: { '@id': orgId },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${SITE_URL}/shop?q={search_term_string}`,
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'Person',
+        '@id': umerId,
+        name: 'Umer Shabbir',
+        jobTitle: 'Founder | Clinical Dietitian & UK-Certified Fitness Trainer',
+        description:
+          'Specialist in Diabetes Management, PCOS, and body recomposition. 1,000+ clients transformed over 8 years.',
+        image:
+          'https://www.fitoo.pro/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fowner1.1806mz4fqowxs.webp',
+        sameAs: [
+          'https://www.facebook.com/share/1H76fXNLjV/',
+          'https://www.instagram.com/umers1017',
+          'https://www.linkedin.com/in/umer-shabbir-66804521b',
+        ],
+        worksFor: { '@id': orgId },
+      },
+      {
+        '@type': 'Person',
+        '@id': basitId,
+        name: 'Abdul Basit Khan',
+        jobTitle: 'Certified Fitness Trainer | Former Mr. Lahore, Mr. Punjab & Mr. Pakistan',
+        description: 'Specialist in competition prep and physique conditioning.',
+        image:
+          'https://www.fitoo.pro/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fowner2.3wfj22it029_x.webp',
+        sameAs: [
+          'https://www.facebook.com/khanbasit012',
+          'https://www.instagram.com/fitoofitness',
+        ],
+        worksFor: { '@id': orgId },
+      },
+    ],
+  };
+};
+
 // `mainEntity` points back at the Organization so the About page is understood
 // as being about the company rather than as a standalone article.
 export const aboutPageJsonLd = ({ description, teamMembers = [] } = {}) => ({
@@ -153,5 +241,116 @@ export const aboutPageJsonLd = ({ description, teamMembers = [] } = {}) => ({
     })),
   },
 });
+
+// Six coaching offers on /programs, each pointing back at the Organization
+// from homeJsonLd via @id so they're understood as services of the same
+// business rather than standalone entities.
+const PROGRAMS = [
+  {
+    name: 'Fat Loss Program',
+    goal: 'fat-loss',
+    description:
+      'Personalized nutrition and training plan to reduce body fat without harming metabolism, with regular coach-led adjustments.',
+    serviceType: 'Nutrition and fitness coaching',
+  },
+  {
+    name: 'Muscle Gain Program',
+    goal: 'muscle-gain',
+    description:
+      'Progressive strength coaching paired with a tailored nutrition surplus and recovery-based training split.',
+    serviceType: 'Nutrition and fitness coaching',
+  },
+  {
+    name: 'Body Recomposition Program',
+    goal: 'body-recomposition',
+    description:
+      'Clinical-nutrition-guided plan to build muscle and lose fat simultaneously through gradual calorie and training adjustments.',
+    serviceType: 'Nutrition and fitness coaching',
+  },
+  {
+    name: 'PCOS Program',
+    goal: 'pcos',
+    description:
+      "Hormonal-health-first nutrition guidance from a clinical dietitian to manage PCOS symptoms and improve insulin sensitivity.",
+    serviceType: 'Clinical nutrition coaching',
+  },
+  {
+    name: 'Diabetes Management Program',
+    goal: 'diabetes',
+    description:
+      "Clinical nutrition program to stabilize blood sugar and improve metabolic markers alongside a patient's doctor.",
+    serviceType: 'Clinical nutrition coaching',
+  },
+  {
+    name: 'Busy Moms Program',
+    goal: 'mother-wellness',
+    description:
+      'Stage-aware nutrition and fitness support for postpartum recovery and breastfeeding.',
+    serviceType: 'Nutrition and fitness coaching',
+  },
+];
+
+export const programsJsonLd = () => ({
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  '@id': absoluteUrl('/programs#itemlist'),
+  itemListElement: PROGRAMS.map((program, index) => ({
+    '@type': 'Service',
+    position: index + 1,
+    name: program.name,
+    url: absoluteUrl(`/consultation?goal=${program.goal}`),
+    description: program.description,
+    provider: { '@id': absoluteUrl('/#organization') },
+    serviceType: program.serviceType,
+    areaServed: 'PK',
+  })),
+});
+
+// WebPage + Service pair for /consultation. Title/description are pulled
+// from CONSULTATION_SEO so this stays in sync with the meta tags.
+export const consultationJsonLd = ({ title, description } = {}) => {
+  const url = absoluteUrl('/consultation');
+  const serviceId = `${url}#service`;
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${url}#webpage`,
+        url,
+        name: title,
+        description,
+        isPartOf: { '@id': absoluteUrl('/#website') },
+        primaryImageOfPage: {
+          '@type': 'ImageObject',
+          url: DEFAULT_OG_IMAGE,
+        },
+        mainEntity: { '@id': serviceId },
+      },
+      {
+        '@type': 'Service',
+        '@id': serviceId,
+        name: 'Free Diet & Supplement Consultation',
+        description:
+          "A custom diet and supplement plan tailored to your goals, guided by Fitoo's expert nutritionists. Initial consultation is free.",
+        provider: { '@id': absoluteUrl('/#organization') },
+        serviceType: 'Nutrition consultation',
+        areaServed: 'PK',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: CURRENCY,
+          description: 'Free initial consultation',
+        },
+        availableChannel: {
+          '@type': 'ServiceChannel',
+          serviceUrl: url,
+          availableLanguage: ['en'],
+        },
+      },
+    ],
+  };
+};
 
 export default productJsonLd;

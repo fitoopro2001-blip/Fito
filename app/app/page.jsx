@@ -10,7 +10,7 @@ import LatestArticles from '@/sections/home/LatestArticles';
 import NewsLetterCTA from '@/sections/home/NewsLetter';
 import JsonLd from '@/components/shared/JsonLd';
 import { buildMetadata } from '@/lib/seo';
-import { websiteJsonLd } from '@/lib/jsonld';
+import { homeJsonLd } from '@/lib/jsonld';
 import { HOME_SEO } from '@/constants/seoContent';
 
 // Static copy, unlike products and blogs which generate theirs on save.
@@ -28,7 +28,7 @@ export const metadata = buildMetadata({
 export default function HomePage() {
   return (
     <>
-      <JsonLd data={websiteJsonLd()} />
+      <JsonLd data={homeJsonLd()} />
       <Hero />
       <Certificates />
       <GoalsSection />

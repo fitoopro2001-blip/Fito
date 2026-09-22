@@ -1,7 +1,7 @@
 import ProgramsContent from '@/sections/programs/ProgramsContent';
 import JsonLd from '@/components/shared/JsonLd';
 import { buildMetadata } from '@/lib/seo';
-import { breadcrumbJsonLd } from '@/lib/jsonld';
+import { breadcrumbJsonLd, programsJsonLd } from '@/lib/jsonld';
 import { PROGRAMS_SEO } from '@/constants/seoContent';
 
 export const metadata = buildMetadata({
@@ -15,10 +15,13 @@ export default function ProgramsPage() {
   return (
     <>
       <JsonLd
-        data={breadcrumbJsonLd([
-          { name: 'Home', href: '/' },
-          { name: 'Programs', href: '/programs' },
-        ])}
+        data={[
+          breadcrumbJsonLd([
+            { name: 'Home', href: '/' },
+            { name: 'Programs', href: '/programs' },
+          ]),
+          programsJsonLd(),
+        ]}
       />
       <ProgramsContent />
     </>

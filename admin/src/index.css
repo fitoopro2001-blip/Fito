@@ -99,6 +99,37 @@ body {
   margin-bottom: 0;
 }
 
+.rich-text-editor-content h1 { font-size: 2em; }
+.rich-text-editor-content h2 { font-size: 1.6em; }
+.rich-text-editor-content h3 { font-size: 1.35em; }
+.rich-text-editor-content h4 { font-size: 1.15em; }
+.rich-text-editor-content h5 { font-size: 1em; }
+.rich-text-editor-content h6 { font-size: 0.9em; }
+
+.rich-text-editor-content h1,
+.rich-text-editor-content h2,
+.rich-text-editor-content h3,
+.rich-text-editor-content h4,
+.rich-text-editor-content h5,
+.rich-text-editor-content h6 {
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0.4em 0 0.6em;
+}
+
+.rich-text-editor-content ul,
+.rich-text-editor-content ol {
+  margin: 0 0 0.85em;
+  padding-left: 1.5em;
+}
+
+.rich-text-editor-content ul { list-style: disc; }
+.rich-text-editor-content ol { list-style: decimal; }
+
+.rich-text-editor-content li p {
+  margin: 0;
+}
+
 .rich-text-editor-content a {
   color: var(--color-primary);
   text-decoration: underline;

@@ -275,9 +275,9 @@ export default function ProductTemplate({ id, initialProduct = null }) {
                 >
                     <H3 className="text-2xl font-bold text-white mb-4">Description</H3>
                     {/* `description` is sanitized HTML from the admin's Tiptap editor
-                        (bold/italic/strike/links only) — same as blog `content`. */}
+                        (bold/italic/strike/links/headings/lists) — same as blog `content`. */}
                     <div
-                        className="text-gray-300 leading-relaxed flex flex-col gap-3 [&_p]:m-0 [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_strong]:font-semibold [&_strong]:text-white [&_em]:italic [&_s]:line-through"
+                        className="text-gray-300 leading-relaxed flex flex-col gap-3 [&_p]:m-0 [&_h1]:text-4xl [&_h2]:text-3xl [&_h3]:text-2xl [&_h4]:text-xl [&_h5]:text-lg [&_h6]:text-base [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-bold [&_h4]:font-bold [&_h5]:font-bold [&_h6]:font-bold [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_li_p]:m-0[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_strong]:font-semibold [&_strong]:text-white [&_em]:italic [&_s]:line-through"
                         dangerouslySetInnerHTML={{ __html: product.description ?? '' }}
                     />
                 </motion.div>

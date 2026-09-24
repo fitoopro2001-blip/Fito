@@ -2,19 +2,55 @@ import { forwardRef, useEffect, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Placeholder } from '@tiptap/extensions';
-import { Button, Divider, Input, Popover } from 'antd';
-import { BoldOutlined, ItalicOutlined, LinkOutlined, StrikethroughOutlined } from '@ant-design/icons';
+import { FontSize, TextStyle } from '@tiptap/extension-text-style';
+import { Button, Divider, Input, Popover, Select } from 'antd';
+import {
+    BoldOutlined,
+    ItalicOutlined,
+    LinkOutlined,
+    OrderedListOutlined,
+    StrikethroughOutlined,
+    UnorderedListOutlined,
+} from '@ant-design/icons';
 
-// Deliberately minimal — the toolbar (and the extensions behind it) only ever
-// expose bold, italic, strike and links, so admins can't produce headings,
-// lists or other markup the public blog page isn't designed to render.
+const HEADING_OPTIONS = [
+    { value: 'p', label: 'Paragraph' },
+    ...[1, 2, 3, 4, 5, 6].map((l) => ({ value: `h${l}`, label: `Heading ${l}` })),
+];
+
+function HeadingSelect({ editor }) {
+    let current = 'p';
+    for (let l = 1; l <= 6; l += 1) {
+        if (editor.isActive('heading', { level: l })) current = `h${l}`;
+    }
+
+    const onChange = (val) => {
+        const chain = editor.chain().focus();
+        if (val === 'p') chain.setParagraph().run();
+        else chain.setHeading({ level: Number(val.slice(1)) }).run();
+    };
+
+    return (
+        <Select
+            value={current}
+            options={HEADING_OPTIONS}
+            onChange={onChange}
+            // Borderless so the parent Form.Item's error state doesn't turn
+            // this select red — the editor frame already shows validation.
+            variant="borderless"
+            style={{ width: 136 }}
+            className="shrink-0 rounded-md! hover:bg-gray-100!"
+            popupMatchSelectWidth={false}
+        />
+    );
+}
+
+// Deliberately limited — the toolbar (and the extensions behind it) expose
+// bold, italic, strike, links, headings (h1–h6) and bullet/numbered lists, so
+// admins can't produce other markup the public pages aren't designed to render.
 const buildExtensions = (placeholder) => [
     StarterKit.configure({
-        heading: false,
-        bulletList: false,
-        orderedList: false,
-        listItem: false,
-        listKeymap: false,
+        heading: { levels: [1, 2, 3, 4, 5, 6] },
         blockquote: false,
         codeBlock: false,
         code: false,
@@ -27,8 +63,54 @@ const buildExtensions = (placeholder) => [
             HTMLAttributes: { rel: 'noopener noreferrer nofollow', target: '_blank' },
         },
     }),
+    TextStyle,
+    FontSize,
     Placeholder.configure({ placeholder: placeholder || '' }),
 ];
+
+const SIZE_OPTIONS = [
+    { value: '', label: 'Default' },
+    ...[12, 14, 16, 18, 20, 24, 28, 32, 40].map((s) => ({ value: `${s}px`, label: `${s}px` })),
+];
+
+function SizeSelect({ editor }) {
+    // Text without an explicit size (plain paragraphs, headings) used to show
+    // "Default" here, which looked like the size had been reset. Show the size
+    // it is actually rendered at instead.
+    let current = editor.getAttributes('textStyle').fontSize || '';
+    if (!current) {
+        try {
+            const { node } = editor.view.domAtPos(editor.state.selection.from);
+            const el = node.nodeType === 3 ? node.parentElement : node;
+            if (el) current = `${Math.round(parseFloat(getComputedStyle(el).fontSize))}px`;
+        } catch {
+            current = '';
+        }
+    }
+
+    const options = SIZE_OPTIONS.some((o) => o.value === current) || !current
+        ? SIZE_OPTIONS
+        : [...SIZE_OPTIONS, { value: current, label: current }];
+
+    const onChange = (val) => {
+        const chain = editor.chain().focus();
+        if (val) chain.setFontSize(val).run();
+        else chain.unsetFontSize().run();
+    };
+
+    return (
+        <Select
+            value={current}
+            options={options}
+            onChange={onChange}
+            variant="borderless"
+            style={{ width: 96 }}
+            className="shrink-0 rounded-md! hover:bg-gray-100!"
+            popupMatchSelectWidth={false}
+            title="Text size"
+        />
+    );
+}
 
 // forwardRef matters here, not just for style: antd's Popover (used by
 // LinkButton below) clones its trigger child and attaches a ref to it to
@@ -142,7 +224,10 @@ function LinkButton({ editor }) {
 
 function Toolbar({ editor }) {
     return (
-        <div className="flex items-center justify-center gap-1 p-2 bg-gray-50 border-b border-gray-200 rounded-t-[7px]">
+        <div className="flex flex-wrap items-center justify-start gap-1 px-3 py-2 bg-gray-50 border-b border-gray-200 rounded-t-[7px]">
+            <HeadingSelect editor={editor} />
+            <SizeSelect editor={editor} />
+            <Divider orientation="vertical" className="mx-1.5! h-6!" />
             <ToolbarButton
                 active={editor.isActive('bold')}
                 icon={<BoldOutlined />}
@@ -160,6 +245,19 @@ function Toolbar({ editor }) {
                 icon={<StrikethroughOutlined />}
                 title="Strikethrough"
                 onClick={() => editor.chain().focus().toggleStrike().run()}
+            />
+            <Divider orientation="vertical" className="mx-1.5! h-6!" />
+            <ToolbarButton
+                active={editor.isActive('bulletList')}
+                icon={<UnorderedListOutlined />}
+                title="Bullet list"
+                onClick={() => editor.chain().focus().toggleBulletList().run()}
+            />
+            <ToolbarButton
+                active={editor.isActive('orderedList')}
+                icon={<OrderedListOutlined />}
+                title="Numbered list"
+                onClick={() => editor.chain().focus().toggleOrderedList().run()}
             />
             <Divider orientation="vertical" className="mx-1.5! h-6!" />
             <LinkButton editor={editor} />

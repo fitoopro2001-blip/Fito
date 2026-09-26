@@ -45,7 +45,7 @@ export default function LatestArticles() {
                 key={article.id ?? article.slug}
                 className="group glass border border-border-light rounded-2xl overflow-hidden hover-lift hover:border-primary/30 flex flex-col"
               >
-                <div className="relative w-full aspect-[16/9] overflow-hidden">
+                <div className="relative w-full aspect-[16/10] overflow-hidden">
                   <Image
                     src={imageUrl(article.image)}
                     alt={article.title}

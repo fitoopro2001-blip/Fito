@@ -5,6 +5,10 @@ import { ROUTES } from './routes';
 export const PAGE_TITLES = [
     { path: ROUTES.CONSULTATION_DETAIL, title: 'Consultation Details' },
     { path: ROUTES.CONSULTATION_PRICING, title: 'Consultation Plan Pricing' },
+    { path: ROUTES.COURSE_ENROLLMENTS, title: 'Course Enrolments' },
+    { path: ROUTES.COURSE_ADD, title: 'Add Course' },
+    { path: ROUTES.COURSE_EDIT, title: 'Edit Course' },
+    { path: ROUTES.COURSES, title: 'Course Management' },
     { path: ROUTES.DASHBOARD, title: 'Dashboard' },
     { path: ROUTES.USERS, title: 'User Management' },
     { path: ROUTES.REFERRALS, title: 'Referral Management' },

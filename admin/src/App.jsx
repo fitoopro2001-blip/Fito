@@ -23,6 +23,9 @@ import BlogFormPage from './pages/Blogs/BlogFormPage';
 import NotificationManagementPage from './pages/Notifications/NotificationManagementPage';
 import CareerManagementPage from './pages/Careers/CareerManagementPage';
 import CareerApplicationManagementPage from './pages/CareerApplications/CareerApplicationManagementPage';
+import CourseManagementPage from './pages/Courses/CourseManagementPage';
+import CourseFormPage from './pages/Courses/CourseFormPage';
+import CourseEnrollmentManagementPage from './pages/CourseEnrollments/CourseEnrollmentManagementPage';
 import SubscriberManagementPage from './pages/Subscribers/SubscriberManagementPage';
 import ReviewManagementPage from './pages/Reviews/ReviewManagementPage';
 import OrderManagementPage from './pages/Orders/OrderManagementPage';
@@ -86,6 +89,10 @@ export default function App() {
                   <Route path={ROUTES.BLOGS} element={<BlogManagementPage />} />
                   <Route path={ROUTES.BLOG_ADD} element={<BlogFormPage />} />
                   <Route path={ROUTES.BLOG_EDIT} element={<BlogFormPage />} />
+                  <Route path={ROUTES.COURSES} element={<CourseManagementPage />} />
+                  <Route path={ROUTES.COURSE_ADD} element={<CourseFormPage />} />
+                  <Route path={ROUTES.COURSE_EDIT} element={<CourseFormPage />} />
+                  <Route path={ROUTES.COURSE_ENROLLMENTS} element={<CourseEnrollmentManagementPage />} />
                   <Route path={ROUTES.NOTIFICATIONS} element={<NotificationManagementPage />} />
                   <Route path={ROUTES.CAREERS} element={<CareerManagementPage />} />
                   <Route path={ROUTES.CAREER_APPLICATIONS} element={<CareerApplicationManagementPage />} />

@@ -30,6 +30,10 @@ import adminSubscribersRoutes from './routes/adminSubscribers.routes.js';
 import careersRoutes from './routes/careers.routes.js';
 import adminCareersRoutes from './routes/adminCareers.routes.js';
 import adminCareerApplicationsRoutes from './routes/adminCareerApplications.routes.js';
+import coursesRoutes from './routes/courses.routes.js';
+import adminCoursesRoutes from './routes/adminCourses.routes.js';
+import courseEnrollmentsRoutes from './routes/courseEnrollments.routes.js';
+import adminCourseEnrollmentsRoutes from './routes/adminCourseEnrollments.routes.js';
 import { notFound, errorHandler } from './middleware/error.middleware.js';
 
 const app = express();
@@ -73,6 +77,10 @@ app.use('/api/admin/subscribers', adminSubscribersRoutes);
 app.use('/api/careers', careersRoutes);
 app.use('/api/admin/careers', adminCareersRoutes);
 app.use('/api/admin/career-applications', adminCareerApplicationsRoutes);
+app.use('/api/courses', coursesRoutes);
+app.use('/api/admin/courses', adminCoursesRoutes);
+app.use('/api/course-enrollments', courseEnrollmentsRoutes);
+app.use('/api/admin/course-enrollments', adminCourseEnrollmentsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -17,6 +17,8 @@ import {
     PercentageOutlined,
     IdcardOutlined,
     SolutionOutlined,
+    BookOutlined,
+    AuditOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import { ROUTES } from '../../constants/routes';
@@ -33,6 +35,8 @@ export default function Sidebar({ collapsed }) {
         isSuperAdmin && { key: ROUTES.REFERRALS, icon: <GiftOutlined />, label: 'Referral Management' },
         isSuperAdmin && { key: ROUTES.PROMO_CODES, icon: <PercentageOutlined />, label: 'Promo Codes' },
         { key: ROUTES.CONSULTATIONS, icon: <MedicineBoxOutlined />, label: 'Consultation Management' },
+        { key: ROUTES.COURSES, icon: <BookOutlined />, label: 'Course Management' },
+        { key: ROUTES.COURSE_ENROLLMENTS, icon: <AuditOutlined />, label: 'Course Enrolments' },
         { key: ROUTES.PRODUCTS, icon: <ShoppingOutlined />, label: 'Product Management' },
         { key: ROUTES.CATEGORIES, icon: <TagsOutlined />, label: 'Category Management' },
         isSuperAdmin && { key: ROUTES.REVIEWS, icon: <StarOutlined />, label: 'Review Management' },

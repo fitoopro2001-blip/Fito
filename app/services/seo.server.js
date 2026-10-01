@@ -42,3 +42,14 @@ export const getBlogsForSeo = async () => {
     const data = await getJson('/blogs');
     return data?.blogs ?? [];
 };
+
+export const getCourseForSeo = async (slug) => {
+    if (!slug) return null;
+    const data = await getJson(`/courses/${encodeURIComponent(slug)}`);
+    return data?.course ?? null;
+};
+
+export const getCoursesForSeo = async () => {
+    const data = await getJson('/courses');
+    return data?.courses ?? [];
+};

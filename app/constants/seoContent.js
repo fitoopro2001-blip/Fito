@@ -93,6 +93,20 @@ export const BLOG_SEO = {
     ],
 };
 
+export const ACADEMY_SEO = {
+    title: 'FITOO Academy | Onsite Nutrition & Fitness Courses in Lahore',
+    description:
+        'Learn practical nutrition, consultation, fitness coaching and business skills through FITOO Academy onsite courses in Lahore. Explore the curriculum and enrol.',
+    keywords: [
+        'fitoo academy',
+        'nutrition courses lahore',
+        'dietitian courses pakistan',
+        'sports nutrition course',
+        'fitness trainer course lahore',
+        'diabetes nutrition course',
+    ],
+};
+
 export const CAREERS_SEO = {
     title: 'Careers at Fitoo | Join Our Team – Current Job Openings',
     description:

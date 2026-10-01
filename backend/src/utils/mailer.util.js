@@ -137,6 +137,50 @@ export const sendPromoCodeEmail = async ({ to, name, promo, referredName, sharea
     }
 };
 
+const escapeHtml = (value) =>
+    String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+// Sent when an admin approves the payment on a course enrolment. `enrollment`
+// carries its own snapshot of the course, so this doesn't depend on the
+// course still existing.
+export const sendCourseEnrollmentApprovedEmail = async ({ to, enrollment }) => {
+    const course = enrollment.courseSnapshot ?? {};
+    const fee = `PKR ${Number(course.price ?? 0).toLocaleString('en-US')}`;
+    const courseLink = course.slug ? `${APP_PUBLIC_URL}/academy/courses/${course.slug}` : `${APP_PUBLIC_URL}/academy`;
+
+    const { error } = await getResend().emails.send({
+        from: FROM_ADDRESS,
+        to,
+        subject: `You're enrolled — ${course.title}`,
+        html: `
+            <p>Hi ${escapeHtml(enrollment.fullName) || 'there'},</p>
+            <p>Your payment has been verified and your enrolment is confirmed. Welcome to FITOO Academy!</p>
+            <p style="font-size: 20px; font-weight: bold;">${escapeHtml(course.title)}</p>
+            <table style="border-collapse: collapse;">
+                <tr>
+                    <td style="padding:6px 16px 6px 0; color:#666;">Fee paid</td>
+                    <td style="padding:6px 0; font-weight:bold;">${fee}</td>
+                </tr>
+                ${
+                    enrollment.transactionId
+                        ? `<tr>
+                    <td style="padding:6px 16px 6px 0; color:#666;">Transaction ID</td>
+                    <td style="padding:6px 0;">${escapeHtml(enrollment.transactionId)}</td>
+                </tr>`
+                        : ''
+                }
+            </table>
+            <p>Our team will contact you on ${escapeHtml(enrollment.phone)} with your batch schedule and venue details.</p>
+            <p><a href="${courseLink}">View course details</a></p>
+        `,
+    });
+    if (error) {
+        const err = new Error(error.message || 'Failed to send enrolment confirmation email');
+        err.statusCode = 502;
+        throw err;
+    }
+};
+
 // Every recipient gets their own personal unsubscribe link, so this can't be
 // a single shared email — each one is addressed individually.
 const BACKEND_PUBLIC_URL = process.env.BACKEND_PUBLIC_URL || 'http://localhost:5000';

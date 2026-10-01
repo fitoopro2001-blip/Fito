@@ -25,6 +25,8 @@ const COLOR_MAP = {
     used: 'blue',
     expired: 'default',
     revoked: 'red',
+    approved: 'green',
+    rejected: 'red',
 };
 
 const formatLabel = (value) =>

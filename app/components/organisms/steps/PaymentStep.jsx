@@ -22,7 +22,8 @@ import { useCountry } from '../../../context/CountryContext';
 import { formatPrice } from '../../../utils/formatCurrency';
 import { resolvePlanPrice } from '../../../utils/planPrice';
 
-const PAYMENT_DETAILS = [
+// Exported for the course enrolment modal, which pays into the same account.
+export const PAYMENT_DETAILS = [
   { label: 'Bank Name', value: 'Meezan Bank - Rewaz Garden, Lahore', icon: <BankOutlined />, copyable: false },
   { label: 'Account Title', value: 'Umer Shabbir', icon: <IdcardOutlined />, copyable: false },
   { label: 'Account Number', value: '02600107003289', icon: <NumberOutlined />, copyable: true },
@@ -30,7 +31,7 @@ const PAYMENT_DETAILS = [
   { label: 'Swift Code', value: 'MEZNPKKALHR', icon: <NumberOutlined />, copyable: true },
 ];
 
-function CopyableRow({ label, value, icon, copyable }) {
+export function CopyableRow({ label, value, icon, copyable }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {

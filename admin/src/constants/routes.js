@@ -18,6 +18,10 @@ export const ROUTES = {
     BLOGS: '/blogs',
     BLOG_ADD: '/blogs/add',
     BLOG_EDIT: '/blogs/:id/edit',
+    COURSES: '/courses',
+    COURSE_ADD: '/courses/add',
+    COURSE_EDIT: '/courses/:id/edit',
+    COURSE_ENROLLMENTS: '/courses/enrollments',
     NOTIFICATIONS: '/notifications',
     CAREERS: '/careers',
     CAREER_APPLICATIONS: '/careers/applications',
@@ -30,3 +34,4 @@ export const consultationDetailPath = (id) => `/consultations/${id}`;
 export const consultationPricingPath = (goalId) => `/consultations/goal/${goalId}/pricing`;
 export const productEditPath = (id) => `/products/${id}/edit`;
 export const blogEditPath = (id) => `/blogs/${id}/edit`;
+export const courseEditPath = (id) => `/courses/${id}/edit`;

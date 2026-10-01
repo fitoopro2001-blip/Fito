@@ -9,6 +9,15 @@ import useAuth from '@/hooks/useAuth';
 import ConsultationSummaryCard from '@/components/organisms/dashboard/ConsultationSummaryCard';
 import ConversationPanel from '@/components/organisms/dashboard/ConversationPanel';
 import { getMyConsultations } from '@/services/consultation.service';
+import { getMyEnrollments } from '@/services/course.service';
+import { ENROLLMENT_STATUS_LABEL } from '@/constants/courses';
+import { formatPrice } from '@/utils/formatCurrency';
+
+const ENROLLMENT_STATUS_CLASS = {
+  pending: 'bg-yellow-500/10 text-yellow-400',
+  approved: 'bg-green-500/10 text-green-400',
+  rejected: 'bg-red-500/10 text-red-400',
+};
 
 const { Title, Paragraph } = Typography;
 
@@ -23,10 +32,16 @@ function DashboardPageInner({ isAuthenticated }) {
   const router = useRouter();
   const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(isAuthenticated);
+  const [enrollments, setEnrollments] = useState([]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
     let cancelled = false;
+    getMyEnrollments()
+      .then((data) => {
+        if (!cancelled) setEnrollments(data);
+      })
+      .catch(() => {});
     getMyConsultations()
       .then((data) => {
         if (!cancelled) setConsultations(data);
@@ -102,6 +117,35 @@ function DashboardPageInner({ isAuthenticated }) {
               </div>
             </div>
           ))}
+
+        {enrollments.length > 0 && (
+          <div className="mt-12">
+            <Title level={3} className="!text-white !mb-4">
+              My Courses
+            </Title>
+            <div className="flex flex-col gap-3">
+              {enrollments.map((enrollment) => (
+                <div
+                  key={enrollment.id}
+                  className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap"
+                >
+                  <div>
+                    <div className="text-white font-medium">{enrollment.course?.title}</div>
+                    <div className="text-sm text-gray-400 mt-1">
+                      {formatPrice(enrollment.course?.price ?? 0, 'PKR')}
+                      {' · '}Submitted {new Date(enrollment.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <span
+                    className={`text-xs font-semibold px-3 py-1 rounded-full ${ENROLLMENT_STATUS_CLASS[enrollment.status] ?? ''}`}
+                  >
+                    {ENROLLMENT_STATUS_LABEL[enrollment.status] ?? enrollment.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

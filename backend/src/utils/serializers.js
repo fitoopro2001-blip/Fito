@@ -195,6 +195,70 @@ export const toPublicCareer = (career) => ({
     createdAt: career.createdAt,
 });
 
+// `price` is what's charged; `originalPrice` is only reported when it's
+// actually higher, so the frontends can treat a truthy value as "show the
+// strike-through".
+export const toPublicCourse = (course) => {
+    const hasDiscount = (course.originalPrice ?? 0) > course.price;
+    return {
+        id: course._id,
+        code: course.code,
+        slug: course.slug,
+        title: course.title,
+        summary: course.summary,
+        category: course.category,
+        image: course.image,
+        price: course.price,
+        originalPrice: hasDiscount ? course.originalPrice : null,
+        discountPercent: hasDiscount
+            ? Math.round((1 - course.price / course.originalPrice) * 100)
+            : 0,
+        currency: 'PKR',
+        durationWeeks: course.durationWeeks,
+        hours: course.hours,
+        schedule: course.schedule,
+        batchGuidance: course.batchGuidance,
+        venue: course.venue,
+        overview: course.overview,
+        audience: course.audience,
+        outcomes: course.outcomes ?? [],
+        curriculum: (course.curriculum ?? []).map((row) => ({
+            week: row.week,
+            topic: row.topic,
+            practical: row.practical,
+        })),
+        inclusions: course.inclusions,
+        assessment: course.assessment,
+        disclaimer: course.disclaimer,
+        status: course.status,
+        sortOrder: course.sortOrder ?? 0,
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
+    };
+};
+
+// `user` is only expanded when the calling controller populated it (the
+// admin list does).
+export const toPublicCourseEnrollment = (enrollment) => ({
+    id: enrollment._id,
+    user: enrollment.user?.name
+        ? { id: enrollment.user._id, name: enrollment.user.name, email: enrollment.user.email }
+        : { id: enrollment.user },
+    courseId: enrollment.course?._id ?? enrollment.course,
+    course: enrollment.courseSnapshot,
+    fullName: enrollment.fullName,
+    email: enrollment.email,
+    phone: enrollment.phone,
+    qualification: enrollment.qualification,
+    notes: enrollment.notes,
+    paymentScreenshot: enrollment.paymentScreenshot,
+    transactionId: enrollment.transactionId,
+    status: enrollment.status,
+    reviewedAt: enrollment.reviewedAt,
+    confirmationEmailSentAt: enrollment.confirmationEmailSentAt,
+    createdAt: enrollment.createdAt,
+});
+
 // `career` is expected to be populated with at least `title` by the calling
 // controller (admin list view); it's the raw ObjectId right after creation.
 export const toPublicCareerApplication = (application) => ({

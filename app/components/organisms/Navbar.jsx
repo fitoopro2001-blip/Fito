@@ -22,6 +22,7 @@ const navLinks = [
   { label: 'Shop', href: '/shop' },
   { label: 'Programs', href: '/programs' },
   { label: 'Consultation', href: '/consultation' },
+  { label: 'Academy', href: '/academy' },
   { label: 'Blog', href: '/blog' },
   { label: 'Careers', href: '/careers' },
   { label: 'About', href: '/about' },

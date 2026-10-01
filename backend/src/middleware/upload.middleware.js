@@ -58,6 +58,9 @@ export const uploadConsultationFiles = upload.fields([
     { name: 'paymentScreenshot', maxCount: 1 },
 ]);
 
+// Course enrolments carry just the payment proof.
+export const uploadPaymentScreenshot = upload.single('paymentScreenshot');
+
 // Admin-uploaded proof of a commission payment.
 export const uploadCommissionProof = upload.single('proofScreenshot');
 

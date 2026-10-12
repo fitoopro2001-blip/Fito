@@ -200,7 +200,15 @@ export default function Footer() {
         </div>
 
         <p className="mt-6 text-center text-xs text-text-muted">
-          Powered by Diversify Digital
+          Powered by{" "}
+          <a
+            href="https://www.diversifydigitalglobal.online/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-text transition-colors"
+          >
+            Diversify Digital
+          </a>
         </p>
       </div>
     </footer>

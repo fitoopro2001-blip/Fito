@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(node -e ' *)",
+      "Bash(npx eslint *)",
+      "Bash(node --check src/models/User.model.js)",
+      "Bash(node --check src/routes/auth.routes.js)",
+      "Bash(xargs -I{} echo {})",
+      "Bash(npm run *)",
+      "Bash(cd /c/Projects/Fito/backend/src && echo \"--adminBlogs.routes.js--\"; cat routes/adminBlogs.routes.js; echo \"--server.js or app.js--\"; find . -maxdepth 1 -iname \"*.js\"; find .. -maxdepth 1 -iname \"server.js\")",
+      "Read(//c/Projects/**)",
+      "Bash(timeout 5 node server.js)",
+      "Bash(node _tmp_cleanup.mjs)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(lsof -ti:5000 -sTCP:LISTEN)",
+      "Bash(xargs -r kill)",
+      "Bash(disown)",
+      "Bash(timeout 30 bash -c 'until curl -sf http://localhost:5000/api/health >/dev/null; do sleep 1; done')",
+      "Bash(lsof -ti:3000 -sTCP:LISTEN)",
+      "Bash(timeout 60 bash -c 'until curl -sf http://localhost:3000 >/dev/null; do sleep 2; done')",
+      "Bash(command -v chromium-cli)",
+      "Read(//c/Users/AWAIS/AppData/Local/Temp/claude/bundled-skills/2.1.220/**)",
+      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(JSON.stringify\\(p.dependencies,null,1\\)\\)\")",
+      "Bash(timeout 25 node server.js)"
+    ]
+  }
+}

@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #cf4842;
+  --color-primary-hover: #a34840;
+  --color-primary-active: #8a3b35;
+  --color-primary-light: #fbe9e7;
+  --color-page: #f5f6fa;
+  --color-skeleton-base: #e9eaee;
+  --color-skeleton-sheen: #f7f8fa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.admin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--color-primary-light);
+  color: var(--color-primary-active);
+}
+
+@keyframes row-highlight-fade {
+  from {
+    background-color: var(--color-primary-light);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.row-highlight > td {
+  animation: row-highlight-fade 2.5s ease-out forwards;
+}
+
+/* Loading-skeleton placeholders: a soft base tone with a light band sweeping
+   across it left-to-right, on a loop. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-skeleton-base);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(90deg, transparent, var(--color-skeleton-sheen), transparent);
+  animation: skeleton-sweep 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+@keyframes skeleton-sweep {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Blog body editor (components/molecules/RichTextEditor.jsx). Tiptap ships no
+   CSS of its own, so marks and the empty-state placeholder are styled here. */
+.rich-text-editor-content {
+  outline: none;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #1f2937;
+}
+
+.rich-text-editor-content p {
+  margin: 0 0 0.85em;
+}
+
+.rich-text-editor-content p:last-child {
+  margin-bottom: 0;
+}
+
+.rich-text-editor-content h1 { font-size: 2em; }
+.rich-text-editor-content h2 { font-size: 1.6em; }
+.rich-text-editor-content h3 { font-size: 1.35em; }
+.rich-text-editor-content h4 { font-size: 1.15em; }
+.rich-text-editor-content h5 { font-size: 1em; }
+.rich-text-editor-content h6 { font-size: 0.9em; }
+
+.rich-text-editor-content h1,
+.rich-text-editor-content h2,
+.rich-text-editor-content h3,
+.rich-text-editor-content h4,
+.rich-text-editor-content h5,
+.rich-text-editor-content h6 {
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0.4em 0 0.6em;
+}
+
+.rich-text-editor-content ul,
+.rich-text-editor-content ol {
+  margin: 0 0 0.85em;
+  padding-left: 1.5em;
+}
+
+.rich-text-editor-content ul { list-style: disc; }
+.rich-text-editor-content ol { list-style: decimal; }
+
+.rich-text-editor-content li p {
+  margin: 0;
+}
+
+.rich-text-editor-content a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rich-text-editor-content a:hover {
+  color: var(--color-primary-hover);
+}
+
+.rich-text-editor-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+/* Mobile: modals shrink to fit the viewport instead of overflowing it. */
+@media (max-width: 640px) {
+  .ant-modal {
+    max-width: calc(100vw - 24px);
+    top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .ant-modal-content {
+    width: 100%;
+  }
+
+  /* Form drawers (create/edit panels) go full-width on mobile instead of
+     rendering at their fixed desktop px width, which would otherwise leave
+     the form too narrow to use. The nav drawer keeps its own narrower width
+     since it's a menu, not a form. */
+  .mobile-full-drawer .ant-drawer-content-wrapper {
+    width: 100vw !important;
+  }
+}

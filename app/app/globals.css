@@ -1,0 +1,518 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand */
+  --primary: #CF4842;
+  --primary-hover: #A34840;
+  --primary-active: #8A3B35;
+  --secondary: #201D1C;
+
+  /* Backgrounds */
+  --background: #0F0F0F;
+  --background-secondary: #171717;
+  --surface: #1E1E1E;
+  --card: #262626;
+
+  /* Text */
+  --text: #FBE3E0;
+  --text-secondary: #D1D5DB;
+  --text-muted: #9CA3AF;
+  --text-inverse: #FFFFFF;
+
+  /* Borders */
+  --border: #3F3F46;
+  --border-light: color-mix(in srgb, var(--text) 10%, transparent);
+
+  /* Status */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #3B82F6;
+
+  /* Overlays */
+  --overlay: color-mix(in srgb, var(--text) 5%, transparent);
+  --overlay-strong: color-mix(in srgb, var(--text) 10%, transparent);
+  --overlay-medium: color-mix(in srgb, var(--text) 20%, transparent);
+  --scrim: color-mix(in srgb, var(--background) 60%, transparent);
+
+  /* Gradients */
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, var(--background), var(--primary));
+  --gradient-primary: linear-gradient(to right, var(--primary), var(--primary-hover));
+
+  /* Pinkish-white fading into theme red — same hue family throughout */
+  --gradient-text: linear-gradient(to right, #FBE3E0, var(--primary));
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-light: var(--primary-light);
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-cream: var(--accent-cream);
+  --color-secondary: var(--secondary);
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-overlay: var(--overlay);
+  --color-overlay-strong: var(--overlay-strong);
+  --color-overlay-medium: var(--overlay-medium);
+  --color-scrim: var(--scrim);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+  /* --font-geist-sans is now actually defined, by next/font in layout.jsx. */
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Stops iOS from re-flowing text mid-scroll on rotate/zoom. */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Never let a stray wide child create a horizontal scroll axis — the browser
+   has to check for one on every scroll frame when it might exist. */
+html {
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--text-inverse);
+}
+
+.bg-gradient-brand {
+  background-image: var(--gradient-brand);
+}
+
+.bg-gradient-primary {
+  background-image: var(--gradient-primary);
+}
+
+.bg-gradient-text {
+  background-image: var(--gradient-text);
+  background-size: 200% auto;
+}
+
+/* The shimmer repaints the text every frame. It's a nicety, so it only runs
+   on devices with a real pointer — phones get the static gradient. */
+@media (hover: hover) and (pointer: fine) {
+  .bg-gradient-text {
+    animation: gradient-shimmer 4s ease-in-out infinite;
+  }
+}
+
+@keyframes gradient-shimmer {
+
+  0%,
+  100% {
+    background-position: 0% center;
+  }
+
+  50% {
+    background-position: 100% center;
+  }
+}
+
+/* Loading-skeleton placeholders: a soft base tone with a light band sweeping
+   across it left-to-right, on a loop. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--overlay-strong);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(90deg, transparent, var(--overlay-medium), transparent);
+  animation: skeleton-sweep 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+@keyframes skeleton-sweep {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--primary) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 60%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+
+/* ── Ant Design theme overrides ── */
+.ant-btn-primary {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.ant-btn-primary:hover {
+  background: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+.ant-btn-primary:active {
+  background: var(--primary-active) !important;
+  border-color: var(--primary-active) !important;
+}
+
+/* Inputs, selects, pickers */
+.ant-input,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+  border-radius: 12px !important;
+}
+
+.ant-input:focus,
+.ant-input-number:focus,
+.ant-select-selector:focus,
+.ant-picker:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent) !important;
+}
+
+.ant-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.ant-select-selection-placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Slider */
+.ant-slider-track {
+  background: var(--primary) !important;
+}
+
+.ant-slider-handle {
+  border-color: var(--primary) !important;
+}
+
+.ant-slider-handle:focus {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 30%, transparent) !important;
+}
+
+/* Steps */
+.ant-steps-item-title {
+  color: var(--text-secondary) !important;
+}
+
+.ant-steps-item-process .ant-steps-item-title {
+  color: var(--text) !important;
+}
+
+.ant-steps-item-finish .ant-steps-item-title {
+  color: var(--primary) !important;
+}
+
+.ant-steps-item-finish .ant-steps-item-icon {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+/* Timeline */
+.ant-timeline-item-content {
+  color: var(--text-secondary) !important;
+}
+
+/* Modal */
+.ant-modal-content {
+  background: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Upload */
+.ant-upload-list-picture-card .ant-upload-list-item {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+.ant-upload.ant-upload-select-picture-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+.ant-upload.ant-upload-select-picture-card:hover {
+  border-color: var(--primary) !important;
+}
+
+/* Badge */
+.ant-badge-status-text {
+  color: var(--text-secondary) !important;
+}
+
+/* Divider */
+.ant-divider {
+  border-color: var(--border) !important;
+}
+
+/* Card (used in dashboard) */
+.ant-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+}
+
+.ant-card-head {
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.ant-card-head-title {
+  color: var(--text) !important;
+}
+
+.ant-card-body {
+  color: var(--text-secondary) !important;
+}
+
+/* 
+══════════════════════════════════════════════════════════════════
+   Scroll performance primitives
+   ══════════════════════════════════════════════════════════════════ */
+
+/* `glass` replaces raw `backdrop-blur-*` on cards.
+
+   backdrop-filter is the most expensive thing you can put on a scrolling
+   surface: the compositor has to snapshot and blur the backdrop for every
+   element, every frame. With ~26 blurred cards on the home page that alone
+   drops a mid-range phone below 30fps.
+
+   So: solid tinted background by default (visually near-identical over our
+   dark theme), and the real blur only on pointer-precise, wide viewports
+   where there's GPU headroom to spare. */
+.glass {
+  background-color: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .glass {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+.glass-strong {
+  background-color: color-mix(in srgb, var(--background) 85%, transparent);
+}
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .glass-strong {
+    background-color: color-mix(in srgb, var(--background) 60%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* Skip layout, paint, and style work for sections that are scrolled out of
+   view. `contain-intrinsic-size` gives the browser a placeholder height so the
+   scrollbar doesn't jump as sections are realized.
+
+   Applied to below-the-fold sections only — never the hero, or LCP regresses. */
+.section-defer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
+/* Promote a genuinely-animating element to its own compositor layer and tell
+   the browser which properties will change, so it doesn't repaint its parent.
+   Use sparingly: every layer costs GPU memory. */
+.gpu-layer {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Card hover lift done in CSS instead of JS. framer-motion's whileHover runs
+   through React state and the animation loop; a transform transition is
+   handled entirely by the compositor. */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease, background-color 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hover-lift:hover {
+    transform: translate3d(0, -8px, 0);
+  }
+
+  .hover-lift-sm:hover {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+/* Reveal-on-scroll without JS. The section starts faded/offset and the
+   `animation-timeline: view()` scroll-driven animation resolves it as it
+   enters the viewport — runs off the main thread where supported. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Anything decorative and non-interactive should be invisible to hit-testing
+   and excluded from layout/paint containment calculations. */
+.decor {
+  pointer-events: none;
+  contain: strict;
+}
+
+/* Honour the OS-level motion preference globally. This is an accessibility
+   requirement (WCAG 2.3.3) and a free perf win for users who set it. */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .bg-gradient-text {
+    animation: none;
+    background-size: 100% auto;
+  }
+}
+
+/* ──
+Transformation story before/after wipe ──
+   Pure CSS replacement for what used to be a framer-motion clipPath animation
+   driven by React state. Desktop reveals on hover; touch devices can't
+   hover, so a hidden checkbox (.story-toggle) + a <label> wrapping the image
+   drive the same reveal off a tap instead. */
+.story-after {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.6s ease-in-out;
+}
+
+.story-handle {
+  left: 100%;
+  transition: left 0.6s ease-in-out;
+}
+
+.story-toggle:checked ~ .story-media .story-after {
+  clip-path: inset(0 0 0 0);
+}
+
+.story-toggle:checked ~ .story-media .story-handle {
+  left: 0%;
+}
+
+@media (hover: hover) and (pointer: fine) {
+
+  .story:hover .story-after {
+    clip-path: inset(0 0 0 0);
+  }
+
+  .story:hover .story-handle {
+    left: 0%;
+  }
+
+  .story-hint {
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+  }
+
+  .story:hover .story-hint {
+    opacity: 0;
+  }
+}
+
+/* Glowing "tap to see results" pill, mobile-only fallback for devices
+   without hover. Fades out once the toggle is checked. */
+.story-tap-hint {
+  animation: story-tap-glow 1.8s ease-in-out infinite;
+  transition: opacity 0.3s ease;
+}
+
+.story-toggle:checked ~ .story-media .story-tap-hint {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes story-tap-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 60%, transparent);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 16px 4px color-mix(in srgb, var(--primary) 60%, transparent);
+    transform: scale(1.06);
+  }
+}
+
+/* Certificates marquee. Moved out of styled-jsx so the component can stay
+   server-rendered. translateX only, so it composites off the main thread. */
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.marquee {
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .marquee {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    animation: none;
+  }
+}

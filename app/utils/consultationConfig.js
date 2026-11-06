@@ -1,0 +1,458 @@
+import FatLossForm from "../components/organisms/forms/FatLossForm";
+import MuscleGainForm from "../components/organisms/forms/MuscleGainForm";
+import BodyRecompositionForm from "../components/organisms/forms/BodyRecompositionForm";
+import PCOSForm from "../components/organisms/forms/PCOSForm";
+import MotherWellnessForm from "../components/organisms/forms/MotherWellnessForm";
+import DiabetesForm from "../components/organisms/forms/DiabetesForm";
+import HomeTrainingForm from "../components/organisms/forms/HomeTrainingForm";
+import OfficeConsultationForm from "../components/organisms/forms/OfficeConsultationForm";
+
+import fatLossImage from "../assets/images/fat-loss.webp";
+import muscleGainImage from "../assets/images/muscle-gain.webp";
+import bodyRecompositionImage from "../assets/images/body-recomposition.webp";
+import pcosImage from "../assets/images/PCOS.webp";
+import motherWellnessImage from "../assets/images/mother-wellness-program.webp";
+import diabeticPatientsImage from "../assets/images/diabetic-patients.webp";
+import homeTrainingImage from "../assets/images/home.webp";
+import officeConsultationImage from "../assets/images/physical.webp";
+
+
+// Placeholder pricing/features per goal — edit freely once real numbers are
+// confirmed. Each goal gets its own 1/3/6 month plans (id, price in PKR,
+// image shown on the plan-selection screen, a feature list describing what's
+// included, and a "bestFor" line describing who the plan suits).
+export const CONSULTATION_GOALS = [
+  {
+    id: "fat-loss",
+    title: "Fat Loss",
+    shortDescription: "Lose body fat with a personalized nutrition plan.",
+    icon: "🔥",
+    image: fatLossImage,
+    color: "#F59E0B",
+    component: FatLossForm,
+    plans: [
+      {
+        id: "1-month",
+        durationMonths: 1,
+        label: "Basic",
+        price: 4500,
+        image: fatLossImage,
+        bestFor: "Best for those who want a quick reset or trying it out before committing longer.",
+        features: [
+          "Personalized fat loss nutrition plan",
+          "2 follow-up check-ins",
+          "WhatsApp support (working hours)",
+          "1 plan revision",
+        ],
+      },
+      {
+        id: "3-month",
+        durationMonths: 3,
+        label: "Pro",
+        price: 12000,
+        image: fatLossImage,
+        badge: "Most Popular",
+        bestFor: "Best for steady, sustainable fat loss with ongoing guidance and adjustments.",
+        features: [
+          "Everything in the 1 Month plan",
+          "Monthly plan revisions (3 total)",
+          "6 follow-up check-ins",
+          "Priority WhatsApp support",
+        ],
+      },
+      {
+        id: "6-month",
+        durationMonths: 6,
+        label: "Premium",
+        price: 21000,
+        image: fatLossImage,
+        badge: "Best Value",
+        bestFor: "Best for long-term commitment and building lasting lifestyle changes.",
+        features: [
+          "Everything in the 3 Month plan",
+          "Bi-weekly check-ins (12 total)",
+          "Unlimited plan revisions",
+          "Priority support, 7 days a week",
+        ],
+      },
+    ],
+  },
+  {
+    id: "muscle-gain",
+    title: "Muscle Gain",
+    shortDescription: "Build lean muscle and increase strength.",
+    icon: "💪",
+    image: muscleGainImage,
+    color: "#3B82F6",
+    component: MuscleGainForm,
+    plans: [
+      {
+        id: "1-month",
+        durationMonths: 1,
+        label: "Basic",
+        price: 5000,
+        image: muscleGainImage,
+        bestFor: "Best for those who want a quick reset or trying it out before committing longer.",
+        features: [
+          "Personalized muscle gain nutrition plan",
+          "2 follow-up check-ins",
+          "WhatsApp support (working hours)",
+          "1 plan revision",
+        ],
+      },
+      {
+        id: "3-month",
+        durationMonths: 3,
+        label: "Pro",
+        price: 13500,
+        image: muscleGainImage,
+        badge: "Most Popular",
+        bestFor: "Best for steady, sustainable muscle gain with ongoing guidance and adjustments.",
+        features: [
+          "Everything in the 1 Month plan",
+          "Monthly plan revisions (3 total)",
+          "6 follow-up check-ins",
+          "Priority WhatsApp support",
+        ],
+      },
+      {
+        id: "6-month",
+        durationMonths: 6,
+        label: "Premium",
+        price: 24000,
+        image: muscleGainImage,
+        badge: "Best Value",
+        bestFor: "Best for long-term commitment and building lasting strength gains.",
+        features: [
+          "Everything in the 3 Month plan",
+          "Bi-weekly check-ins (12 total)",
+          "Unlimited plan revisions",
+          "Priority support, 7 days a week",
+        ],
+      },
+    ],
+  },
+  {
+    id: "body-recomposition",
+    title: "Body Recomposition",
+    shortDescription: "Build muscle while reducing body fat.",
+    icon: "⚖️",
+    image: bodyRecompositionImage,
+    color: "#10B981",
+    component: BodyRecompositionForm,
+    plans: [
+      {
+        id: "1-month",
+        durationMonths: 1,
+        label: "Basic",
+        price: 5000,
+        image: bodyRecompositionImage,
+        bestFor: "Best for those who want a quick reset or trying it out before committing longer.",
+        features: [
+          "Personalized body recomposition plan",
+          "2 follow-up check-ins",
+          "WhatsApp support (working hours)",
+          "1 plan revision",
+        ],
+      },
+      {
+        id: "3-month",
+        durationMonths: 3,
+        label: "Pro",
+        price: 13500,
+        image: bodyRecompositionImage,
+        badge: "Most Popular",
+        bestFor: "Best for steady body recomposition with ongoing guidance and adjustments.",
+        features: [
+          "Everything in the 1 Month plan",
+          "Monthly plan revisions (3 total)",
+          "6 follow-up check-ins",
+          "Priority WhatsApp support",
+        ],
+      },
+      {
+        id: "6-month",
+        durationMonths: 6,
+        label: "Premium",
+        price: 24000,
+        image: bodyRecompositionImage,
+        badge: "Best Value",
+        bestFor: "Best for long-term commitment and lasting body composition change.",
+        features: [
+          "Everything in the 3 Month plan",
+          "Bi-weekly check-ins (12 total)",
+          "Unlimited plan revisions",
+          "Priority support, 7 days a week",
+        ],
+      },
+    ],
+  },
+  {
+    id: "pcos",
+    title: "PCOS",
+    shortDescription: "Nutrition guidance for managing PCOS symptoms.",
+    icon: "🌸",
+    image: pcosImage,
+    color: "#EC4899",
+    component: PCOSForm,
+    plans: [
+      {
+        id: "1-month",
+        durationMonths: 1,
+        label: "Basic",
+        price: 5500,
+        image: pcosImage,
+        bestFor: "Best for those newly diagnosed and wanting to understand what changes help first.",
+        features: [
+          "Personalized PCOS-friendly nutrition plan",
+          "2 follow-up check-ins",
+          "WhatsApp support (working hours)",
+          "1 plan revision",
+        ],
+      },
+      {
+        id: "3-month",
+        durationMonths: 3,
+        label: "Pro",
+        price: 15000,
+        image: pcosImage,
+        badge: "Most Popular",
+        bestFor: "Best for managing symptoms consistently as hormonal changes take time to show.",
+        features: [
+          "Everything in the 1 Month plan",
+          "Monthly plan revisions (3 total)",
+          "6 follow-up check-ins",
+          "Priority WhatsApp support",
+        ],
+      },
+      {
+        id: "6-month",
+        durationMonths: 6,
+        label: "Premium",
+        price: 27000,
+        image: pcosImage,
+        badge: "Best Value",
+        bestFor: "Best for long-term hormone balance and sustained symptom management.",
+        features: [
+          "Everything in the 3 Month plan",
+          "Bi-weekly check-ins (12 total)",
+          "Unlimited plan revisions",
+          "Priority support, 7 days a week",
+        ],
+      },
+    ],
+  },
+  {
+    id: "mother-wellness",
+    title: "Busy Moms",
+    shortDescription: "Nutrition & fitness support for moms working on their postpartum goals.",
+    icon: "🤱",
+    image: motherWellnessImage,
+    color: "#8B5CF6",
+    component: MotherWellnessForm,
+    plans: [
+      {
+        id: "1-month",
+        durationMonths: 1,
+        label: "Basic",
+        price: 6000,
+        image: motherWellnessImage,
+        bestFor: "Best for a specific stage of postpartum recovery that needs short-term support.",
+        features: [
+          "Personalized maternal nutrition plan",
+          "2 follow-up check-ins",
+          "WhatsApp support (working hours)",
+          "1 plan revision",
+        ],
+      },
+      {
+        id: "3-month",
+        durationMonths: 3,
+        label: "Pro",
+        price: 16500,
+        image: motherWellnessImage,
+        badge: "Most Popular",
+        bestFor: "Best for ongoing support across postpartum recovery and fitness goals.",
+        features: [
+          "Everything in the 1 Month plan",
+          "Monthly plan revisions (3 total)",
+          "6 follow-up check-ins",
+          "Priority WhatsApp support",
+        ],
+      },
+      {
+        id: "6-month",
+        durationMonths: 6,
+        label: "Premium",
+        price: 30000,
+        image: motherWellnessImage,
+        badge: "Best Value",
+        bestFor: "Best for continuous support through breastfeeding and long-term fitness goals.",
+        features: [
+          "Everything in the 3 Month plan",
+          "Bi-weekly check-ins (12 total)",
+          "Unlimited plan revisions",
+          "Priority support, 7 days a week",
+        ],
+      },
+    ],
+  },
+  {
+    id: "diabetes",
+    title: "Diabetic Patients",
+    shortDescription: "Nutrition guidance for managing blood sugar and diabetes.",
+    icon: "🩸",
+    image: diabeticPatientsImage,
+    color: "#EF4444",
+    component: DiabetesForm,
+    plans: [
+      {
+        id: "1-month",
+        durationMonths: 1,
+        label: "Basic",
+        price: 5500,
+        image: diabeticPatientsImage,
+        bestFor: "Best for those newly diagnosed and wanting a plan to start stabilizing blood sugar.",
+        features: [
+          "Personalized diabetic-friendly nutrition plan",
+          "2 follow-up check-ins",
+          "WhatsApp support (working hours)",
+          "1 plan revision",
+        ],
+      },
+      {
+        id: "3-month",
+        durationMonths: 3,
+        label: "Pro",
+        price: 15000,
+        image: diabeticPatientsImage,
+        badge: "Most Popular",
+        bestFor: "Best for consistently tracking blood sugar trends and adjusting the plan as they improve.",
+        features: [
+          "Everything in the 1 Month plan",
+          "Monthly plan revisions (3 total)",
+          "6 follow-up check-ins",
+          "Priority WhatsApp support",
+        ],
+      },
+      {
+        id: "6-month",
+        durationMonths: 6,
+        label: "Premium",
+        price: 27000,
+        image: diabeticPatientsImage,
+        badge: "Best Value",
+        bestFor: "Best for long-term blood sugar control and reducing reliance on medication over time.",
+        features: [
+          "Everything in the 3 Month plan",
+          "Bi-weekly check-ins (12 total)",
+          "Unlimited plan revisions",
+          "Priority support, 7 days a week",
+        ],
+      },
+    ],
+  },
+  {
+    // One-on-One Home Training (Lahore). Launched paused — every plan below
+    // has isPaused: true, so the flow shows them blurred as "Coming Soon"
+    // and they can't be selected/bought. Real plans + pricing are
+    // admin-managed (see the admin "Manage Pricing" page); this static list
+    // is only the pre-fetch fallback. Uses the fat-loss image as a
+    // placeholder until dedicated art is supplied.
+    id: "home-training",
+    title: "Home Training",
+    shortDescription: "One-on-one training with a certified coach at your home in Lahore.",
+    icon: "🏠",
+    image: homeTrainingImage,
+    color: "#F97316",
+    component: HomeTrainingForm,
+    plans: [
+      {
+        id: "12-days",
+        durationMonths: 1,
+        label: "12 Days / Month",
+        price: 29999,
+        image: fatLossImage,
+        isPaused: true,
+        bestFor: "Best for building a consistent routine with a trainer three days a week.",
+        features: [
+          "Certified trainer at your home",
+          "12 one-on-one sessions per month",
+          "Personalized workout plan (goal-based)",
+          "Form correction and technique coaching",
+          "Progress and body measurement tracking",
+          "Flexible scheduling around you",
+          "WhatsApp coaching support",
+        ],
+      },
+      {
+        id: "16-days",
+        durationMonths: 1,
+        label: "16 Days / Month",
+        price: 39999,
+        image: fatLossImage,
+        isPaused: true,
+        badge: "Most Popular",
+        bestFor: "Best for faster progress with four supervised sessions a week.",
+        features: [
+          "Certified trainer at your home",
+          "16 one-on-one sessions per month",
+          "Personalized workout plan (goal-based)",
+          "Form correction and technique coaching",
+          "Progress and body measurement tracking",
+          "Flexible scheduling around you",
+          "WhatsApp coaching support",
+        ],
+      },
+      {
+        id: "20-days",
+        durationMonths: 1,
+        label: "20 Days / Month",
+        price: 49999,
+        image: fatLossImage,
+        isPaused: true,
+        badge: "Best Value",
+        bestFor: "Best for near-daily accountability and the quickest results.",
+        features: [
+          "Certified trainer at your home",
+          "20 one-on-one sessions per month",
+          "Personalized workout plan (goal-based)",
+          "Form correction and technique coaching",
+          "Progress and body measurement tracking",
+          "Flexible scheduling around you",
+          "Priority WhatsApp coaching support",
+        ],
+      },
+    ],
+  },
+  {
+    // Personalized Consultation at the FITOO office. Launched paused — the
+    // single plan below has isPaused: true ("Coming Soon"). Uses the
+    // fat-loss image as a placeholder until dedicated art is supplied.
+    id: "office-consultation",
+    title: "Office Consultation",
+    shortDescription: "A personalized in-person consultation at the FITOO office.",
+    icon: "🏢",
+    image: officeConsultationImage,
+    color: "#0EA5E9",
+    component: OfficeConsultationForm,
+    plans: [
+      {
+        id: "single",
+        durationMonths: 1,
+        label: "Single Consultation",
+        price: 4999,
+        image: fatLossImage,
+        isPaused: true,
+        bestFor: "Best for a one-time expert assessment and a clear plan to move forward.",
+        features: [
+          "In-person consultation at the FITOO office",
+          "Personalized fitness, nutrition and lifestyle guidance",
+          "Body composition and goal assessment",
+          "Custom program direction and next steps",
+          "Follow-up recommendations",
+        ],
+      },
+    ],
+  },
+];

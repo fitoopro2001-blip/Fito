@@ -98,7 +98,6 @@ const getClassSessions = (value, res) => {
         throw error;
     }
 };
-
 // Returns an error message, or null when the fields supplied are valid.
 // Only validates what's present, so it serves both create and update.
 const validateFields = ({ category, status, price, originalPrice, durationWeeks, hours }) => {

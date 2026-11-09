@@ -82,6 +82,11 @@ export default function ConsultationFlow() {
     next();
   };
 
+  const handleSelectPlan = (plan) => {
+    setSelectedPlan(plan);
+    next();
+  };
+
   const steps = [
     <GoalSelection
       key="goal"
@@ -95,7 +100,7 @@ export default function ConsultationFlow() {
       goal={selectedGoalConfig}
       plans={selectedGoalConfig?.plans || []}
       selectedPlan={selectedPlan}
-      onSelect={setSelectedPlan}
+      onSelect={handleSelectPlan}
     />,
 
     <PersonalInfoStep
@@ -157,8 +162,8 @@ export default function ConsultationFlow() {
 
   const handleNext = async () => {
     if (isFinalFormStep) {
-      const success = await submitConsultation();
-      if (success) {
+      try {
+        await submitConsultation();
         // Meta Pixel — a paid consultation was submitted.
         trackEvent('Lead', {
           content_name: selectedGoalConfig?.title || selectedGoal,
@@ -167,8 +172,11 @@ export default function ConsultationFlow() {
           currency: 'PKR',
         });
         next();
-      } else {
-        message.error('Something went wrong submitting your consultation. Please try again.');
+      } catch (error) {
+        message.error(
+          error?.response?.data?.message ||
+            'Something went wrong submitting your consultation. Please try again.'
+        );
       }
       return;
     }
@@ -218,6 +226,7 @@ export default function ConsultationFlow() {
           totalSteps={steps.length - 1}
           isSubmitting={isSubmitting}
           canProceed={canProceed}
+          hideNext={currentStep === planStepIndex}
           onNext={handleNext}
           onPrevious={previous}
         />

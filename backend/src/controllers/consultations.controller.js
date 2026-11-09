@@ -63,11 +63,26 @@ export const createConsultation = asyncHandler(async (req, res) => {
     const personalInfo = parseJson(req.body.personalInfo, null);
     const goalData = parseJson(req.body.goalData, {});
 
+    if (personalInfo && typeof personalInfo === 'object') {
+        for (const field of ['fullName', 'email', 'phone']) {
+            if (typeof personalInfo[field] === 'string') {
+                personalInfo[field] = personalInfo[field].trim();
+            }
+        }
+    }
+
     if (!CONSULTATION_GOALS.includes(goal)) {
         res.status(400);
         throw new Error(`Goal must be one of: ${CONSULTATION_GOALS.join(', ')}`);
     }
-    if (!personalInfo?.fullName || !personalInfo?.email || !personalInfo?.phone) {
+    if (
+        typeof personalInfo?.fullName !== 'string' ||
+        !personalInfo.fullName ||
+        typeof personalInfo.email !== 'string' ||
+        !personalInfo.email ||
+        typeof personalInfo.phone !== 'string' ||
+        !personalInfo.phone
+    ) {
         res.status(400);
         throw new Error('Personal info must include fullName, email and phone');
     }

@@ -13,6 +13,7 @@ export default function NavigationButtons({
   totalSteps,
   canProceed = true,
   isSubmitting = false,
+  hideNext = false,
   onPrevious,
   onNext,
 }) {
@@ -34,7 +35,7 @@ export default function NavigationButtons({
           <span className="hidden sm:inline">Previous</span>
         </Button>
 
-        {isLastStep ? (
+        {hideNext ? null : isLastStep ? (
           <Button
             variant="primary"
             size="lg"

@@ -114,9 +114,6 @@ export default function useConsultation(initialGoal = null) {
       });
 
       return true;
-    } catch (error) {
-      console.error(error);
-      return false;
     } finally {
       setIsSubmitting(false);
     }

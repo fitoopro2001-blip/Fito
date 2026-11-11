@@ -9,8 +9,11 @@ import { useCountry } from '../../../context/CountryContext';
 import { formatPrice } from '../../../utils/formatCurrency';
 import { resolvePlanPrice } from '../../../utils/planPrice';
 
-function formatDuration(months) {
-  return `${months} Month${months > 1 ? 's' : ''}`;
+function getPlanDuration(plan) {
+  const value = plan.durationValue ?? plan.durationDays ?? plan.durationMonths;
+  const unit = plan.durationUnit ?? (plan.durationDays !== undefined ? 'days' : 'months');
+  const label = unit === 'days' ? 'Day' : 'Month';
+  return { value, unit, label: `${value} ${label}${value === 1 ? '' : 's'}` };
 }
 
 export default function PlanSelection({
@@ -43,6 +46,7 @@ export default function PlanSelection({
           const hasDiscount = resolved.discountPercent > 0;
           const chargedPrice = resolved.discountedPrice;
           const isPaused = Boolean(plan.isPaused);
+          const duration = getPlanDuration(plan);
 
           return (
             <Card
@@ -106,7 +110,7 @@ export default function PlanSelection({
 
                 <div className="p-6 flex flex-col grow">
 
-                  <Caption>{formatDuration(plan.durationMonths)}</Caption>
+                  <Caption>{duration.label}</Caption>
 
                   <div className="mt-1 mb-1">
                     <div className="flex items-baseline gap-2 flex-wrap">
@@ -127,7 +131,7 @@ export default function PlanSelection({
                   </div>
 
                   <Text muted className="mb-4">
-                    {formatPrice(Math.round(chargedPrice / plan.durationMonths), resolved.currency)} / month
+                    {formatPrice(Math.round(chargedPrice / duration.value), resolved.currency)} / {duration.unit === 'days' ? 'day' : 'month'}
                   </Text>
 
                   {plan.bestFor && (

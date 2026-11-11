@@ -84,6 +84,7 @@ export default function useConsultation(initialGoal = null) {
         ? {
             id: selectedPlan.id,
             label: selectedPlan.label,
+            durationDays: selectedPlan.durationDays,
             durationMonths: selectedPlan.durationMonths,
             // The real API re-derives this from the admin-managed plan price
             // and ignores what's sent here; testing mode (no backend) has

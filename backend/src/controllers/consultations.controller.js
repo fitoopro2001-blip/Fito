@@ -136,6 +136,7 @@ export const createConsultation = asyncHandler(async (req, res) => {
             id: planDoc._id,
             label: planDoc.label,
             durationMonths: planDoc.durationMonths,
+            durationDays: planDoc.durationDays,
             price: discountedPrice,
             originalPrice: resolved.discountPercent > 0 ? resolved.price : undefined,
             currency: resolved.currency,

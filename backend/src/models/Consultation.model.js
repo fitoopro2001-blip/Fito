@@ -27,6 +27,7 @@ const consultationSchema = new mongoose.Schema(
             id: String,
             label: String,
             durationMonths: Number,
+            durationDays: Number,
             price: Number,
             // Pre-discount price, set only when the plan had an active discount
             // at submission time — kept so admin views can show the strike-through.

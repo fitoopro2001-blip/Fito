@@ -6,7 +6,7 @@
 // Structure & Features (app/assets/pricing), no discounts.
 export const CONSULTATION_PLAN_DEFAULTS = [
     // 1. Fat Loss Transformation Program
-    { goal: 'fat-loss', label: '14-Day Trial', durationMonths: 1, price: 2999, features: [
+    { goal: 'fat-loss', label: '14-Day Trial', durationDays: 14, price: 2999, features: [
         'Personalized fat loss diet plan', 'Customized workout plan (Home/Gym)', 'WhatsApp coaching support', 'Regular progress monitoring',
         'Body measurement tracking', 'Weight tracking', 'Habit-building guidance', 'Diet modifications according to progress', 'Transformation progress reports',
     ] },

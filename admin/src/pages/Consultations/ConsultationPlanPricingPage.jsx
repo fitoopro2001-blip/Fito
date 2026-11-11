@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Input, InputNumber, Card, Tag, Spin, message, Empty, Result } from 'antd';
+import { Button, Input, InputNumber, Card, Tag, Spin, message, Empty, Result, Select } from 'antd';
 import { ArrowLeftOutlined, PlusOutlined, CloseOutlined, PauseCircleOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import ConfirmDeleteButton from '../../components/molecules/ConfirmDeleteButton';
 import { CONSULTATION_GOALS } from '../../constants/consultationGoals';
@@ -27,7 +27,8 @@ const emptyPlan = () => ({
     key: `new-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     isNew: true,
     label: '',
-    durationMonths: 1,
+    durationUnit: 'days',
+    durationValue: 14,
     price: 0,
     priceSAR: 0,
     priceUSD: 0,
@@ -36,6 +37,12 @@ const emptyPlan = () => ({
     discountPercentUSD: 0,
     features: [''],
     isPaused: false,
+});
+
+const normalizePlan = (plan) => ({
+    ...plan,
+    durationUnit: plan.durationDays !== undefined ? 'days' : 'months',
+    durationValue: plan.durationDays ?? plan.durationMonths ?? 1,
 });
 
 // Matches computeDiscountedPrice on the backend (rounded to 2 decimals).
@@ -60,7 +67,7 @@ export default function ConsultationPlanPricingPage() {
         setLoading(true);
         fetchConsultationPlans(goal.id)
             .then((data) => {
-                if (!cancelled) setPlans(data.map((p) => ({ ...p, key: p.id })));
+                if (!cancelled) setPlans(data.map((p) => ({ ...normalizePlan(p), key: p.id })));
             })
             .catch((err) => {
                 if (!cancelled) message.error(apiError(err, 'Failed to load plan pricing'));
@@ -147,7 +154,9 @@ export default function ConsultationPlanPricingPage() {
     const validate = () => {
         for (const p of plans) {
             if (!p.label.trim()) return 'Every program needs a name';
-            if (!p.durationMonths || p.durationMonths < 1) return 'Duration must be at least 1 month';
+            if (!Number.isInteger(p.durationValue) || p.durationValue < 1) {
+                return 'Duration must be a whole number of at least 1';
+            }
             if (p.price === null || p.price === undefined || p.price < 0) return 'PKR price must be a non-negative number';
             if (p.priceSAR === null || p.priceSAR === undefined || p.priceSAR < 0) return 'SAR price must be a non-negative number';
             if (p.priceUSD === null || p.priceUSD === undefined || p.priceUSD < 0) return 'USD price must be a non-negative number';
@@ -175,7 +184,9 @@ export default function ConsultationPlanPricingPage() {
                 cleaned.map((p) => {
                     const payload = {
                         label: p.label.trim(),
-                        durationMonths: p.durationMonths,
+                        ...(p.durationUnit === 'days'
+                            ? { durationDays: p.durationValue }
+                            : { durationMonths: p.durationValue }),
                         price: p.price,
                         priceSAR: p.priceSAR ?? 0,
                         priceUSD: p.priceUSD ?? 0,
@@ -188,7 +199,7 @@ export default function ConsultationPlanPricingPage() {
                     return p.isNew ? createConsultationPlan(goal.id, payload) : updateConsultationPlan(p.id, payload);
                 })
             );
-            setPlans(saved.map((p) => ({ ...p, key: p.id })));
+            setPlans(saved.map((p) => ({ ...normalizePlan(p), key: p.id })));
             message.success('Pricing saved');
         } catch (err) {
             message.error(apiError(err, 'Failed to save pricing'));
@@ -260,13 +271,25 @@ export default function ConsultationPlanPricingPage() {
                                     </div>
                                 )}
                                 <div className="mb-3">
-                                    <div className="text-xs text-gray-500 mb-1">Duration (months)</div>
-                                    <InputNumber
-                                        min={1}
-                                        value={plan.durationMonths}
-                                        onChange={(v) => updatePlan(plan.key, { durationMonths: v })}
-                                        className="w-full sm:w-1/2"
-                                    />
+                                    <div className="text-xs text-gray-500 mb-1">Duration</div>
+                                    <div className="flex gap-2">
+                                        <InputNumber
+                                            min={1}
+                                            precision={0}
+                                            value={plan.durationValue}
+                                            onChange={(v) => updatePlan(plan.key, { durationValue: v })}
+                                            className="w-full sm:w-1/2"
+                                        />
+                                        <Select
+                                            value={plan.durationUnit}
+                                            onChange={(durationUnit) => updatePlan(plan.key, { durationUnit })}
+                                            options={[
+                                                { value: 'days', label: 'Days' },
+                                                { value: 'months', label: 'Months' },
+                                            ]}
+                                            className="w-32"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="text-xs text-gray-500 mb-2">

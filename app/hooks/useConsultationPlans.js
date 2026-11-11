@@ -30,7 +30,10 @@ export default function useConsultationPlans() {
         .map((plan) => ({
           id: plan.id,
           label: plan.label,
+          durationDays: plan.durationDays,
           durationMonths: plan.durationMonths,
+          durationUnit: plan.durationDays !== undefined ? 'days' : 'months',
+          durationValue: plan.durationDays ?? plan.durationMonths,
           price: plan.price,
           priceSAR: plan.priceSAR,
           priceUSD: plan.priceUSD,

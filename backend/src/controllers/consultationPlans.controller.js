@@ -45,6 +45,7 @@ export const listConsultationPlans = asyncHandler(async (req, res) => {
 
     const plans = await ConsultationPlan.find(goalFilter ? { goal: goalFilter } : {}).sort({
         goal: 1,
+        durationDays: 1,
         durationMonths: 1,
         createdAt: 1,
     });
@@ -53,7 +54,7 @@ export const listConsultationPlans = asyncHandler(async (req, res) => {
 
 // POST /api/admin/consultation-plans — creates a new program under a goal.
 export const createConsultationPlan = asyncHandler(async (req, res) => {
-    const { goal, label, durationMonths, price, priceSAR, priceUSD, discountPercent, discountPercentSAR, discountPercentUSD, features, isPaused } = req.body;
+    const { goal, label, durationMonths, durationDays, price, priceSAR, priceUSD, discountPercent, discountPercentSAR, discountPercentUSD, features, isPaused } = req.body;
 
     if (!CONSULTATION_GOALS.includes(goal)) {
         res.status(400);
@@ -63,9 +64,14 @@ export const createConsultationPlan = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Label is required');
     }
-    if (typeof durationMonths !== 'number' || durationMonths < 1) {
+    const hasValidDuration = (value) => Number.isInteger(value) && value >= 1;
+    if (
+        (durationDays === undefined && !hasValidDuration(durationMonths)) ||
+        (durationMonths === undefined && !hasValidDuration(durationDays)) ||
+        (durationMonths !== undefined && durationDays !== undefined)
+    ) {
         res.status(400);
-        throw new Error('Duration must be at least 1 month');
+        throw new Error('Provide either a whole-number duration in days or months');
     }
     if (typeof price !== 'number' || price < 0) {
         res.status(400);
@@ -87,7 +93,7 @@ export const createConsultationPlan = asyncHandler(async (req, res) => {
     const plan = await ConsultationPlan.create({
         goal,
         label: label.trim(),
-        durationMonths,
+        ...(durationDays !== undefined ? { durationDays } : { durationMonths }),
         price,
         priceSAR: priceSAR ?? 0,
         priceUSD: priceUSD ?? 0,
@@ -103,7 +109,7 @@ export const createConsultationPlan = asyncHandler(async (req, res) => {
 
 // PATCH /api/admin/consultation-plans/:id
 export const updateConsultationPlan = asyncHandler(async (req, res) => {
-    const { label, durationMonths, price, priceSAR, priceUSD, discountPercent, discountPercentSAR, discountPercentUSD, features, isPaused } = req.body;
+    const { label, durationMonths, durationDays, price, priceSAR, priceUSD, discountPercent, discountPercentSAR, discountPercentUSD, features, isPaused } = req.body;
 
     const plan = await ConsultationPlan.findById(req.params.id);
     if (!plan) {
@@ -118,12 +124,23 @@ export const updateConsultationPlan = asyncHandler(async (req, res) => {
         }
         plan.label = label.trim();
     }
-    if (durationMonths !== undefined) {
-        if (typeof durationMonths !== 'number' || durationMonths < 1) {
+    if (durationMonths !== undefined || durationDays !== undefined) {
+        const hasValidDuration = (value) => Number.isInteger(value) && value >= 1;
+        if (
+            (durationDays === undefined && !hasValidDuration(durationMonths)) ||
+            (durationMonths === undefined && !hasValidDuration(durationDays)) ||
+            (durationMonths !== undefined && durationDays !== undefined)
+        ) {
             res.status(400);
-            throw new Error('Duration must be at least 1 month');
+            throw new Error('Provide either a whole-number duration in days or months');
         }
-        plan.durationMonths = durationMonths;
+        if (durationDays !== undefined) {
+            plan.durationDays = durationDays;
+            plan.durationMonths = undefined;
+        } else {
+            plan.durationMonths = durationMonths;
+            plan.durationDays = undefined;
+        }
     }
     if (price !== undefined) {
         if (typeof price !== 'number' || price < 0) {

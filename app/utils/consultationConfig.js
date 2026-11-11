@@ -33,7 +33,7 @@ export const CONSULTATION_GOALS = [
     plans: [
       {
         id: "1-month",
-        durationMonths: 1,
+        durationDays: 14,
         label: "Basic",
         price: 4500,
         image: fatLossImage,

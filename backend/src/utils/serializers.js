@@ -170,6 +170,7 @@ export const toPublicConsultationPlan = (plan) => ({
     goal: plan.goal,
     label: plan.label,
     durationMonths: plan.durationMonths,
+    durationDays: plan.durationDays,
     price: plan.price,
     priceSAR: plan.priceSAR ?? 0,
     priceUSD: plan.priceUSD ?? 0,

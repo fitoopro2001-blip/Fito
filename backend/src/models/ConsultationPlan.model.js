@@ -12,7 +12,10 @@ const consultationPlanSchema = new mongoose.Schema(
         // Admin-entered display name (e.g. "Basic", "Pro", "6-Week Reset") —
         // shown as-is on the app's plan selection screen.
         label: { type: String, required: true, trim: true },
-        durationMonths: { type: Number, required: true, min: 1 },
+        // Existing plans keep their month value; new plans can instead use
+        // an exact day count without changing the meaning of older records.
+        durationMonths: { type: Number, min: 1 },
+        durationDays: { type: Number, min: 1 },
         // Admin-entered manually per currency — never derived via exchange
         // rate. `price` (PKR) is the original/required field; `priceSAR`/
         // `priceUSD` default to 0 until an admin fills them in (see

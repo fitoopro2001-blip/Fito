@@ -81,6 +81,9 @@ export default function PaymentStep({
   const resolved = selectedPlan ? resolvePlanPrice(selectedPlan, currency) : null;
   const hasDiscount = (resolved?.discountPercent ?? 0) > 0;
   const chargedPrice = resolved?.discountedPrice ?? null;
+  const durationValue = selectedPlan?.durationValue ?? selectedPlan?.durationDays ?? selectedPlan?.durationMonths;
+  const durationUnit = selectedPlan?.durationUnit ?? (selectedPlan?.durationDays !== undefined ? 'days' : 'months');
+  const durationLabel = durationUnit === 'days' ? 'day' : 'month';
 
   const handlePaymentUpload = (files) => {
     updateField("uploads", {
@@ -138,10 +141,10 @@ export default function PaymentStep({
           )}
         </div>
 
-        {selectedPlan?.durationMonths && (
+        {durationValue && (
           <Text muted className="text-sm mt-1">
-            {formatPrice(Math.round(chargedPrice / selectedPlan.durationMonths), resolved.currency)} / month
-            {' · '}{selectedPlan.durationMonths} month{selectedPlan.durationMonths > 1 ? 's' : ''}
+            {formatPrice(Math.round(chargedPrice / durationValue), resolved.currency)} / {durationLabel}
+            {' · '}{durationValue} {durationLabel}{durationValue > 1 ? 's' : ''}
           </Text>
         )}
 

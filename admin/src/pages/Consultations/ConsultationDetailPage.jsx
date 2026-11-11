@@ -172,7 +172,11 @@ function ConsultationDetailPageInner({ id }) {
                             </Col>
                             <Col xs={12} sm={8}>
                                 <Text className="!text-gray-400 text-xs block mb-1">Duration</Text>
-                                <Text>{consultation.plan.durationMonths} month(s)</Text>
+                                <Text>
+                                    {consultation.plan.durationDays !== undefined
+                                        ? `${consultation.plan.durationDays} day(s)`
+                                        : `${consultation.plan.durationMonths} month(s)`}
+                                </Text>
                             </Col>
                             <Col xs={12} sm={8}>
                                 <Text className="!text-gray-400 text-xs block mb-1">Price</Text>

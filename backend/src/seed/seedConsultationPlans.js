@@ -11,7 +11,7 @@ const PLANS = [
     {
         goal: 'fat-loss',
         label: '14-Day Trial',
-        durationMonths: 1,
+        durationDays: 14,
         price: 2999,
         features: [
             'Personalized fat loss diet plan',

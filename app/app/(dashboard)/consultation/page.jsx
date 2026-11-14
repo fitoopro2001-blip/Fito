@@ -5,6 +5,7 @@ import JsonLd from '@/components/shared/JsonLd';
 import { buildMetadata } from '@/lib/seo';
 import { breadcrumbJsonLd, consultationJsonLd } from '@/lib/jsonld';
 import { CONSULTATION_SEO } from '@/constants/seoContent';
+import QrReferralTracker from '@/components/shared/QrReferralTracker';
 
 // Static copy — see constants/seoContent.js.
 export const metadata = buildMetadata({
@@ -36,6 +37,7 @@ export default function ConsultationPage() {
         </p>
       </div>
       <Suspense fallback={null}>
+        <QrReferralTracker />
         <ConsultationFlow />
       </Suspense>
       <div className="mt-20">

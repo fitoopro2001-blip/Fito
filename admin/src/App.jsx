@@ -9,6 +9,7 @@ import LoginPage from './pages/Login/LoginPage';
 import ForgotPasswordPage from './pages/Login/ForgotPasswordPage';
 import SignupPage from './pages/Signup/SignupPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
+import QrCodeGeneratorPage from './pages/QrCodeGenerator/QrCodeGeneratorPage';
 import UserManagementPage from './pages/Users/UserManagementPage';
 import ReferralManagementPage from './pages/Referrals/ReferralManagementPage';
 import PromoCodeManagementPage from './pages/PromoCodes/PromoCodeManagementPage';
@@ -79,6 +80,7 @@ export default function App() {
               <Route element={<RequireAuth />}>
                 <Route element={<AdminLayout />}>
                   <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+                  <Route path={ROUTES.QR_CODE_GENERATOR} element={<QrCodeGeneratorPage />} />
                   <Route path={ROUTES.CONSULTATIONS} element={<ConsultationManagementPage />} />
                   <Route path={ROUTES.CONSULTATION_DETAIL} element={<ConsultationDetailPage />} />
                   <Route path={ROUTES.CONSULTATION_PRICING} element={<ConsultationPlanPricingPage />} />

@@ -19,6 +19,7 @@ import {
     SolutionOutlined,
     BookOutlined,
     AuditOutlined,
+    QrcodeOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import { ROUTES } from '../../constants/routes';
@@ -31,6 +32,7 @@ export default function Sidebar({ collapsed }) {
 
     const primaryItems = [
         { key: ROUTES.DASHBOARD, icon: <DashboardOutlined />, label: 'Dashboard' },
+        { key: ROUTES.QR_CODE_GENERATOR, icon: <QrcodeOutlined />, label: 'QR Code Generator' },
         isSuperAdmin && { key: ROUTES.USERS, icon: <TeamOutlined />, label: 'User Management' },
         isSuperAdmin && { key: ROUTES.REFERRALS, icon: <GiftOutlined />, label: 'Referral Management' },
         isSuperAdmin && { key: ROUTES.PROMO_CODES, icon: <PercentageOutlined />, label: 'Promo Codes' },

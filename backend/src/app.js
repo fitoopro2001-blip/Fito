@@ -34,6 +34,8 @@ import coursesRoutes from './routes/courses.routes.js';
 import adminCoursesRoutes from './routes/adminCourses.routes.js';
 import courseEnrollmentsRoutes from './routes/courseEnrollments.routes.js';
 import adminCourseEnrollmentsRoutes from './routes/adminCourseEnrollments.routes.js';
+import qrReferralScansRoutes from './routes/qrReferralScans.routes.js';
+import adminQrReferralScansRoutes from './routes/adminQrReferralScans.routes.js';
 import { notFound, errorHandler } from './middleware/error.middleware.js';
 
 const app = express();
@@ -81,6 +83,8 @@ app.use('/api/courses', coursesRoutes);
 app.use('/api/admin/courses', adminCoursesRoutes);
 app.use('/api/course-enrollments', courseEnrollmentsRoutes);
 app.use('/api/admin/course-enrollments', adminCourseEnrollmentsRoutes);
+app.use('/api/referral-scans', qrReferralScansRoutes);
+app.use('/api/admin/referral-scans', adminQrReferralScansRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

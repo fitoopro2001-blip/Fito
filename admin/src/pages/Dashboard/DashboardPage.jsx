@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Row, Col, List, Avatar, Tag, message } from 'antd';
+import { Row, Col, List, Avatar, Tag, message, Card, Table, Button } from 'antd';
 import {
     TeamOutlined,
     CrownOutlined,
@@ -13,6 +13,7 @@ import {
     FireOutlined,
     WarningOutlined,
     MailOutlined,
+    QrcodeOutlined,
 } from '@ant-design/icons';
 import PageHeading from '../../components/atoms/PageHeading';
 import SummaryCard from '../../components/molecules/SummaryCard';
@@ -24,6 +25,7 @@ import { ROUTES, consultationDetailPath } from '../../constants/routes';
 import { fetchDashboardSummary } from '../../api/adminDashboard.api';
 import { useAuth } from '../../context/AuthContext';
 import imageUrl from '../../utils/imageUrl';
+import { fetchQrReferralScanCounts } from '../../api/adminQrReferralScans.api';
 
 const EMPTY_SUMMARY = {
     totalUsers: 0,
@@ -52,6 +54,8 @@ export default function DashboardPage() {
     const [bestSellingProducts, setBestSellingProducts] = useState([]);
     const [outOfStockProducts, setOutOfStockProducts] = useState([]);
     const [recentConsultations, setRecentConsultations] = useState([]);
+    const [qrReferralCounts, setQrReferralCounts] = useState([]);
+    const [qrReferralCountsLoading, setQrReferralCountsLoading] = useState(true);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -73,6 +77,16 @@ export default function DashboardPage() {
             .finally(() => {
                 if (!cancelled) setLoading(false);
             });
+        fetchQrReferralScanCounts()
+            .then((items) => {
+                if (!cancelled) setQrReferralCounts(items);
+            })
+            .catch(() => {
+                if (!cancelled) message.error('Failed to load QR referral scans');
+            })
+            .finally(() => {
+                if (!cancelled) setQrReferralCountsLoading(false);
+            });
         return () => {
             cancelled = true;
         };
@@ -91,7 +105,19 @@ export default function DashboardPage() {
 
     return (
         <div>
-            <PageHeading title="Dashboard" subtitle="Overview of your store performance" />
+            <PageHeading
+                title="Dashboard"
+                subtitle="Overview of your store performance"
+                actions={
+                    <Button
+                        type="primary"
+                        icon={<QrcodeOutlined />}
+                        onClick={() => navigate(ROUTES.QR_CODE_GENERATOR)}
+                    >
+                        Generate QR codes
+                    </Button>
+                }
+            />
 
             <Row gutter={[16, 16]} className="mb-6">
                 {cards.map((c) => (
@@ -100,6 +126,29 @@ export default function DashboardPage() {
                     </Col>
                 ))}
             </Row>
+
+            <Card title="QR Referral Scans" className="mb-6 rounded-2xl border border-gray-100 shadow-sm">
+                <Table
+                    rowKey="referralId"
+                    size="small"
+                    pagination={false}
+                    loading={qrReferralCountsLoading}
+                    dataSource={qrReferralCounts}
+                    columns={[
+                        {
+                            title: 'Logo',
+                            dataIndex: 'referralId',
+                            render: (referralId) => (
+                                <span>
+                                    Logo {referralId.slice(-1)}
+                                    <span className="ml-2 text-gray-400">ref={referralId}</span>
+                                </span>
+                            ),
+                        },
+                        { title: 'Scans', dataIndex: 'count', align: 'right' },
+                    ]}
+                />
+            </Card>
 
             <Row gutter={[16, 16]}>
                 {isSuperAdmin && (

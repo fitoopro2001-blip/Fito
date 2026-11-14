@@ -6,6 +6,7 @@ export const ROUTES = {
     USERS: '/users',
     REFERRALS: '/referrals',
     PROMO_CODES: '/promo-codes',
+    QR_CODE_GENERATOR: '/qr-codes',
     CONSULTATIONS: '/consultations',
     CONSULTATION_DETAIL: '/consultations/:id',
     CONSULTATION_PRICING: '/consultations/goal/:goalId/pricing',

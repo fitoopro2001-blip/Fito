@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-const QR_REFERRAL_IDS = new Set(['logo1', 'logo2', 'logo3', 'logo4', 'logo5']);
+const QR_REFERRAL_ID_PATTERN = /^(logo[1-5]|qr_[a-f0-9]{24})$/;
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function QrReferralTracker() {
@@ -15,7 +15,7 @@ export default function QrReferralTracker() {
     if (lastReferralId.current === referralId) return;
     lastReferralId.current = referralId;
 
-    if (!QR_REFERRAL_IDS.has(referralId)) return;
+    if (typeof referralId !== 'string' || !QR_REFERRAL_ID_PATTERN.test(referralId)) return;
 
     const navigation = window.performance.getEntriesByType('navigation')[0];
     if (navigation?.type === 'reload') return;

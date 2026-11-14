@@ -1,10 +1,18 @@
 import mongoose from 'mongoose';
-import { QR_REFERRAL_IDS } from '../constants/qrReferralIds.js';
+import { isQrReferralId } from '../constants/qrReferralIds.js';
 
 const qrReferralScanSchema = new mongoose.Schema(
     {
         eventId: { type: String, required: true, unique: true },
-        referralId: { type: String, required: true, enum: QR_REFERRAL_IDS, index: true },
+        referralId: {
+            type: String,
+            required: true,
+            index: true,
+            validate: {
+                validator: isQrReferralId,
+                message: 'Invalid QR referral ID',
+            },
+        },
     },
     { timestamps: { createdAt: true, updatedAt: false } }
 );

@@ -131,17 +131,17 @@ export default function DashboardPage() {
                 <Table
                     rowKey="referralId"
                     size="small"
-                    pagination={false}
+                    pagination={{ pageSize: 10, showSizeChanger: true }}
                     loading={qrReferralCountsLoading}
                     dataSource={qrReferralCounts}
                     columns={[
                         {
-                            title: 'Logo',
-                            dataIndex: 'referralId',
-                            render: (referralId) => (
+                            title: 'QR code',
+                            dataIndex: 'name',
+                            render: (name, record) => (
                                 <span>
-                                    Logo {referralId.slice(-1)}
-                                    <span className="ml-2 text-gray-400">ref={referralId}</span>
+                                    {name}
+                                    <span className="ml-2 text-gray-400">ref={record.referralId}</span>
                                 </span>
                             ),
                         },

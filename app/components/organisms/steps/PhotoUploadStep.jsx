@@ -81,7 +81,7 @@ const PhotoUploadStep = forwardRef(function PhotoUploadStep(
                   <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                     <CameraOutlined />
                   </span>
-                  <H5>Body Photos</H5>
+                  <H5>Body Photos (Optional)</H5>
                 </div>
                 {bodyPhotoCount > 0 && (
                   <span className="text-xs font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1">
@@ -91,7 +91,7 @@ const PhotoUploadStep = forwardRef(function PhotoUploadStep(
               </div>
 
               <Text muted className="block mb-4">
-                Upload Front, Side and Back photos.
+                Upload Front, Side and Back photos if available.
               </Text>
 
               <Upload

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function Input({ id, label, icon, suffix, error, type = 'text', className = '', ...rest }) {
+export default function Input({ id, label, icon, suffix, error, type = 'text', className = '', value, ...rest }) {
   const [visible, setVisible] = useState(false);
   const isPassword = type === 'password';
   const resolvedType = isPassword && visible ? 'text' : type;
@@ -20,6 +20,7 @@ export default function Input({ id, label, icon, suffix, error, type = 'text', c
         <input
           id={id}
           type={resolvedType}
+          value={value ?? ''}
           className={`w-full rounded-md bg-overlay border text-text placeholder:text-text-muted text-sm py-2.5 outline-none transition-colors ${
             error ? 'border-danger' : 'border-border-light focus:border-primary'
           } ${icon ? 'pl-10' : 'pl-4'} ${hasRightAdornment ? 'pr-12' : 'pr-4'}`}

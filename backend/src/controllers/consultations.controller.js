@@ -55,8 +55,8 @@ const findMyConsultationOr404 = async (id, userId) => {
 // Fields: goal, plan (JSON), personalInfo (JSON —
 // fullName/email/phone/dob/gender/activityLevel/height/weight all required,
 // mirroring app/utils/consultationValidation.js's Yup schema), goalData
-// (JSON), transactionId, plus file fields bodyPhotos (required, at least
-// one)/reports/paymentScreenshot.
+// (JSON), transactionId, plus optional file fields
+// bodyPhotos/reports/paymentScreenshot.
 export const createConsultation = asyncHandler(async (req, res) => {
     const { goal, transactionId } = req.body;
     const submittedPlan = parseJson(req.body.plan, null);
@@ -144,11 +144,6 @@ export const createConsultation = asyncHandler(async (req, res) => {
     }
 
     const files = req.files ?? {};
-
-    if (!(files.bodyPhotos ?? []).length) {
-        res.status(400);
-        throw new Error('Please upload at least one body photo');
-    }
 
     const consultation = await Consultation.create({
         ...(req.user && { user: req.user._id }),

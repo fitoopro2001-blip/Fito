@@ -38,12 +38,10 @@ export const personalInfoValidationSchema = Yup.object({
     .required("Weight is required"),
 });
 
-// Only bodyPhotos is required — reports stay optional, matching the "(Optional)"
-// label in PhotoUploadStep and the fact the backend never enforces reports.
+// Uploads are optional; consultation submission does not depend on photos or
+// reports being available.
 export const uploadsValidationSchema = Yup.object({
-  bodyPhotos: Yup.array()
-    .min(1, "Please upload at least one body photo")
-    .required("Please upload at least one body photo"),
+  bodyPhotos: Yup.array().optional(),
 });
 
 // Only the fields essential to a nutritionist reviewing the case are

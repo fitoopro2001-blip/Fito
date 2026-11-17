@@ -105,13 +105,16 @@ export default function BlogTemplate({ slug, initialData = null }) {
                     />
                 </motion.div>
 
-                <div className="flex justify-end gap-3 mt-4 rounded-xl border border-border-light bg-overlay-strong p-3">
-                    <Button href="/contact" variant="outline" size="sm">
-                        Contact Us
-                    </Button>
-                    <Button href="/consultation" size="sm">
-                        Consultation
-                    </Button>
+                <div className="flex flex-col gap-3 mt-4 rounded-xl border border-border-light bg-overlay-strong p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 className="text-lg font-semibold text-text">Free Consultation</h2>
+                    <div className="flex flex-wrap gap-3">
+                        <Button href="/contact" variant="outline" size="sm">
+                            Contact Us
+                        </Button>
+                        <Button href="/consultation" size="sm">
+                            Consultation
+                        </Button>
+                    </div>
                 </div>
 
                 <motion.div

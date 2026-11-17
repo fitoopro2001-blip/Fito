@@ -8,6 +8,7 @@ import { H2, Text } from '../atoms/Typography';
 import Icon from '../atoms/Icon';
 import Avatar from '../atoms/Avatar';
 import Spinner from '../atoms/Spinner';
+import Button from '../atoms/Button';
 import BlogCard from '../organisms/BlogCard';
 import useApiResource from '../../hooks/useApiResource';
 import { getBlogBySlug } from '../../services/blog.service';
@@ -103,6 +104,15 @@ export default function BlogTemplate({ slug, initialData = null }) {
                         priority
                     />
                 </motion.div>
+
+                <div className="flex justify-end gap-3 mt-4 rounded-xl border border-border-light bg-overlay-strong p-3">
+                    <Button href="/contact" variant="outline" size="sm">
+                        Contact Us
+                    </Button>
+                    <Button href="/consultation" size="sm">
+                        Consultation
+                    </Button>
+                </div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

@@ -9,6 +9,7 @@ const router = express.Router();
 router.use(protectAdmin, requireSuperAdmin);
 
 router.get('/', listOrders);
+// POS orders use the same super-admin authorization as the order-management API.
 router.post('/pos', createPosOrder);
 router.patch('/:id/status', updateOrderStatus);
 

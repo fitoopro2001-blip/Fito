@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Descriptions, Select, Table, message } from 'antd';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Button, Descriptions, Select, Table, message } from 'antd';
 import Modal from '../../components/atoms/AppModal';
 import PageHeading from '../../components/atoms/PageHeading';
 import SearchBar from '../../components/molecules/SearchBar';
@@ -10,12 +10,14 @@ import DataTable from '../../components/organisms/DataTable';
 import useServerTableQuery from '../../hooks/useServerTableQuery';
 import { ORDER_STATUSES, PAYMENT_METHODS } from '../../data/orders';
 import { fetchOrders, updateOrderStatus as updateOrderStatusApi } from '../../api/adminOrders.api';
+import { ROUTES } from '../../constants/routes';
 
 const paymentLabel = (value) => PAYMENT_METHODS.find((p) => p.value === value)?.label ?? value;
 const capitalize = (value) => value.charAt(0).toUpperCase() + value.slice(1);
 
 export default function OrderManagementPage() {
     const serverQuery = useServerTableQuery(fetchOrders);
+    const navigate = useNavigate();
 
     const orders = serverQuery.items;
     const searchText = serverQuery.searchInput;
@@ -49,6 +51,11 @@ export default function OrderManagementPage() {
 
     const columns = [
         { title: 'Order #', dataIndex: 'orderNumber', render: (value) => value || '—' },
+        {
+            title: 'Channel',
+            dataIndex: 'source',
+            render: (source) => (source === 'pos' ? 'POS' : 'Online'),
+        },
         { title: 'Customer', dataIndex: ['shipping', 'name'] },
         { title: 'City', dataIndex: ['shipping', 'city'] },
         {
@@ -89,6 +96,7 @@ export default function OrderManagementPage() {
 
     const itemColumns = [
         { title: 'Item', dataIndex: 'name' },
+        { title: 'Option', dataIndex: 'variantName', render: (value) => value || '—' },
         { title: 'Qty', dataIndex: 'qty' },
         { title: 'Price', dataIndex: 'price', render: (price) => `Rs. ${price.toFixed(2)}` },
     ];
@@ -98,7 +106,12 @@ export default function OrderManagementPage() {
             <PageHeading
                 title="Order Management"
                 subtitle="View customer orders and update their fulfillment status"
-                actions={<SearchBar value={searchText} onChange={setSearchText} placeholder="Search orders..." />}
+                actions={
+                    <>
+                        <SearchBar value={searchText} onChange={setSearchText} placeholder="Search orders..." />
+                        <Button type="primary" onClick={() => navigate(ROUTES.POS)}>New POS order</Button>
+                    </>
+                }
             />
 
             <DataTable
@@ -115,6 +128,7 @@ export default function OrderManagementPage() {
                     <>
                         <Descriptions column={1} bordered size="small">
                             <Descriptions.Item label="Order #">{viewing.orderNumber || '—'}</Descriptions.Item>
+                            <Descriptions.Item label="Channel">{viewing.source === 'pos' ? 'POS' : 'Online'}</Descriptions.Item>
                             <Descriptions.Item label="Status"><StatusTag status={viewing.status} /></Descriptions.Item>
                             <Descriptions.Item label="Placed At">{new Date(viewing.placedAt).toLocaleString()}</Descriptions.Item>
                             <Descriptions.Item label="Customer">{viewing.shipping.name}</Descriptions.Item>
@@ -138,12 +152,20 @@ export default function OrderManagementPage() {
                                     </Descriptions.Item>
                                 </>
                             )}
+                            {(viewing.source === 'pos' || viewing.deliveryCharge > 0) && (
+                                <>
+                                    {viewing.source === 'pos' && (
+                                        <Descriptions.Item label="Subtotal">{`Rs. ${viewing.subtotal.toFixed(2)}`}</Descriptions.Item>
+                                    )}
+                                    <Descriptions.Item label="Delivery charges">{`Rs. ${viewing.deliveryCharge.toFixed(2)}`}</Descriptions.Item>
+                                </>
+                            )}
                             <Descriptions.Item label="Total">{`Rs. ${viewing.total.toFixed(2)}`}</Descriptions.Item>
                         </Descriptions>
 
                         <Table
                             className="mt-4"
-                            rowKey="name"
+                            rowKey={(item, index) => `${item.productId || item.name}-${item.variantName || ''}-${index}`}
                             columns={itemColumns}
                             dataSource={viewing.items}
                             pagination={false}

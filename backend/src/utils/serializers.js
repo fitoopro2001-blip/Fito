@@ -40,6 +40,8 @@ export const toPublicOrder = (order) => ({
     // fall back to the total, which was the pre-discount amount back then.
     subtotal: order.subtotal ?? order.total,
     discountAmount: order.discountAmount ?? 0,
+    deliveryCharge: order.deliveryCharge ?? 0,
+    source: order.source ?? 'online',
     promoCode: order.promoCode?.code
         ? { code: order.promoCode.code, discountPercent: order.promoCode.discountPercent }
         : null,

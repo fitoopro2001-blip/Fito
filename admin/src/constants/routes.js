@@ -16,6 +16,7 @@ export const ROUTES = {
     CATEGORIES: '/categories',
     REVIEWS: '/reviews',
     ORDERS: '/orders',
+    POS: '/orders/pos',
     BLOGS: '/blogs',
     BLOG_ADD: '/blogs/add',
     BLOG_EDIT: '/blogs/:id/edit',

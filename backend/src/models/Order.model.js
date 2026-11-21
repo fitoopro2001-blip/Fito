@@ -17,6 +17,8 @@ const orderSchema = new mongoose.Schema(
                 name: { type: String, required: true },
                 qty: { type: Number, required: true, min: 1 },
                 price: { type: Number, required: true, min: 0 },
+                productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+                variantName: { type: String, trim: true },
             },
         ],
         // Line-item sum before any promo discount. `total` is what's actually
@@ -24,6 +26,8 @@ const orderSchema = new mongoose.Schema(
         // orders still reports revenue correctly.
         subtotal: { type: Number, min: 0 },
         discountAmount: { type: Number, default: 0, min: 0 },
+        deliveryCharge: { type: Number, default: 0, min: 0 },
+        source: { type: String, enum: ['online', 'pos'], default: 'online' },
         // Snapshot of the redeemed code — kept on the order so the amount can
         // be explained later even if the PromoCode doc is edited or removed.
         promoCode: {
@@ -32,7 +36,7 @@ const orderSchema = new mongoose.Schema(
             promo: { type: mongoose.Schema.Types.ObjectId, ref: 'PromoCode' },
         },
         total: { type: Number, required: true, min: 0 },
-        paymentMethod: { type: String, enum: ['cod', 'online'], required: true },
+        paymentMethod: { type: String, enum: ['cod', 'online', 'cash'], required: true },
         transactionId: { type: String, trim: true },
         screenshotAttached: { type: Boolean, default: false },
         shipping: {

@@ -30,6 +30,7 @@ import CourseEnrollmentManagementPage from './pages/CourseEnrollments/CourseEnro
 import SubscriberManagementPage from './pages/Subscribers/SubscriberManagementPage';
 import ReviewManagementPage from './pages/Reviews/ReviewManagementPage';
 import OrderManagementPage from './pages/Orders/OrderManagementPage';
+import PosOrderPage from './pages/Orders/PosOrderPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import UnauthorizedPage from './pages/Unauthorized/UnauthorizedPage';
 import { ROUTES } from './constants/routes';
@@ -108,6 +109,7 @@ export default function App() {
                     <Route path={ROUTES.PROMO_CODES} element={<PromoCodeManagementPage />} />
                     <Route path={ROUTES.REVIEWS} element={<ReviewManagementPage />} />
                     <Route path={ROUTES.ORDERS} element={<OrderManagementPage />} />
+                    <Route path={ROUTES.POS} element={<PosOrderPage />} />
                   </Route>
                 </Route>
               </Route>

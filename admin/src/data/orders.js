@@ -11,6 +11,7 @@ export const ORDER_STATUSES = ['processing', 'shipped', 'delivered', 'cancelled'
 export const PAYMENT_METHODS = [
     { value: 'cod', label: 'Cash on Delivery' },
     { value: 'online', label: 'Online Transfer' },
+    { value: 'cash', label: 'Cash' },
 ];
 
 // Mirrors the order shape produced by the checkout flow

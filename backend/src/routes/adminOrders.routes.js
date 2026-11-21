@@ -1,5 +1,5 @@
 import express from 'express';
-import { listOrders, updateOrderStatus } from '../controllers/adminOrders.controller.js';
+import { createPosOrder, listOrders, updateOrderStatus } from '../controllers/adminOrders.controller.js';
 import { protectAdmin, requireSuperAdmin } from '../middleware/adminAuth.middleware.js';
 
 const router = express.Router();
@@ -9,6 +9,7 @@ const router = express.Router();
 router.use(protectAdmin, requireSuperAdmin);
 
 router.get('/', listOrders);
+router.post('/pos', createPosOrder);
 router.patch('/:id/status', updateOrderStatus);
 
 export default router;

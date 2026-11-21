@@ -43,6 +43,7 @@ export default function Sidebar({ collapsed }) {
         { key: ROUTES.CATEGORIES, icon: <TagsOutlined />, label: 'Category Management' },
         isSuperAdmin && { key: ROUTES.REVIEWS, icon: <StarOutlined />, label: 'Review Management' },
         isSuperAdmin && { key: ROUTES.ORDERS, icon: <ShoppingCartOutlined />, label: 'Order Management' },
+        isSuperAdmin && { key: ROUTES.POS, icon: <ShoppingOutlined />, label: 'POS' },
         { key: ROUTES.BLOGS, icon: <ReadOutlined />, label: 'Blog Management' },
         { key: ROUTES.NOTIFICATIONS, icon: <BellOutlined />, label: 'Notification Management' },
         { key: ROUTES.CAREERS, icon: <IdcardOutlined />, label: 'Career Management' },

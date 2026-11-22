@@ -9,6 +9,7 @@ import Button from '../atoms/Button';
 import Icon from '../atoms/Icon';
 import ProductDetailSkeleton from './ProductDetailSkeleton';
 import FeaturedProducts from '../organisms/FeaturedProducts';
+import ProductCertificates from '../organisms/ProductCertificates';
 import ReviewSection from '../organisms/ReviewSection';
 import QuantitySelector from '../molecules/QuantitySelector';
 import useCart from '../../hooks/useCart';
@@ -308,6 +309,8 @@ export default function ProductTemplate({ id, initialProduct = null }) {
                         </div>
                     </motion.div>
                 )}
+
+                <ProductCertificates />
 
                 <ReviewSection
                     productId={product.id}

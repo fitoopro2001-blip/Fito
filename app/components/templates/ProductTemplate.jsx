@@ -44,7 +44,7 @@ export default function ProductTemplate({ id, initialProduct = null }) {
 
     const [quantity, setQuantity] = useState(1);
     const [selectedVariant, setSelectedVariant] = useState(null);
-    const { addToCart, isInCart } = useCart();
+    const { addToCart, isInCart, showCartItem } = useCart();
     const { isWishlisted, toggleWishlist } = useWishlist();
 
     // Resets the selected variant during render (not an effect) whenever the
@@ -107,7 +107,11 @@ export default function ProductTemplate({ id, initialProduct = null }) {
     const comingSoon = product.status === 'coming_soon';
 
     const handleAddToCart = () => {
-        if (!inCart && !needsVariant && !comingSoon) addToCart(product, quantity, selectedVariant);
+        if (inCart) {
+            showCartItem(product, selectedVariant);
+        } else if (!needsVariant && !comingSoon) {
+            addToCart(product, quantity, selectedVariant);
+        }
     };
 
     // Keeps the rating summary in sync after a review is written or removed.
@@ -211,7 +215,7 @@ export default function ProductTemplate({ id, initialProduct = null }) {
                                 variant="primary"
                                 size="lg"
                                 onClick={handleAddToCart}
-                                disabled={inCart || needsVariant || comingSoon}
+                                disabled={needsVariant || comingSoon}
                                 className="flex-1 min-w-[150px]"
                             >
                                 {comingSoon ? (
@@ -221,8 +225,8 @@ export default function ProductTemplate({ id, initialProduct = null }) {
                                     </>
                                 ) : inCart ? (
                                     <>
-                                        <Icon name="check" className="w-5 h-5 mr-2" />
-                                        In Cart
+                                        <Icon name="cart" className="w-5 h-5 mr-2" />
+                                        View Cart
                                     </>
                                 ) : (
                                     <>

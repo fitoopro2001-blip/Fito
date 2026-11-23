@@ -64,14 +64,16 @@ export default function AddToCartPopup() {
             <div className="p-6 sm:p-8">
               <div className="mb-6 flex items-center gap-3 pr-10">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-                  <Icon name="check-circle" className="h-6 w-6" />
+                  <Icon name={recentlyAdded.alreadyInCart ? 'cart' : 'check-circle'} className="h-6 w-6" />
                 </span>
                 <div>
                   <h2 id="cart-popup-title" className="text-xl font-bold text-text sm:text-2xl">
-                    Added to your cart
+                    {recentlyAdded.alreadyInCart ? 'Already in your cart' : 'Added to your cart'}
                   </h2>
                   <p className="mt-0.5 text-sm text-text-secondary">
-                    Your item is ready whenever you are.
+                    {recentlyAdded.alreadyInCart
+                      ? 'This item is in your cart. You can review it now.'
+                      : 'Your item is ready whenever you are.'}
                   </p>
                 </div>
               </div>

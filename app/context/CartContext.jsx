@@ -26,6 +26,24 @@ export function CartProvider({ children }) {
   const [recentlyAdded, setRecentlyAdded] = useState(null);
   const { productsAvailable } = useCountry();
   const dismissRecentlyAdded = useCallback(() => setRecentlyAdded(null), []);
+  const showCartItem = useCallback(
+    (product, variant = null) => {
+      const lineId = lineIdOf(product.id, variantKeyOf(variant));
+      const cartItem = items.find((item) => lineKeyOf(item) === lineId);
+      if (!cartItem) return;
+
+      setRecentlyAdded({
+        id: cartItem.id,
+        name: cartItem.name,
+        image: cartItem.image,
+        price: cartItem.price,
+        quantity: cartItem.quantity,
+        variantName: cartItem.variantName,
+        alreadyInCart: true,
+      });
+    },
+    [items]
+  );
 
   const addToCart = useCallback(
     (product, quantity = 1, variant = null) => {
@@ -65,6 +83,7 @@ export function CartProvider({ children }) {
         price: variant?.price ?? product.discountedPrice ?? product.price,
         quantity,
         variantName: variant?.name,
+        alreadyInCart: false,
       });
 
       // Meta Pixel — fires for every successful add, including quantity bumps
@@ -133,13 +152,14 @@ export function CartProvider({ children }) {
       totalPrice,
       recentlyAdded,
       dismissRecentlyAdded,
+      showCartItem,
       addToCart,
       removeFromCart,
       updateQuantity,
       clearCart,
       isInCart,
     }),
-    [items, totalItems, totalPrice, recentlyAdded, dismissRecentlyAdded, addToCart, removeFromCart, updateQuantity, clearCart, isInCart]
+    [items, totalItems, totalPrice, recentlyAdded, dismissRecentlyAdded, showCartItem, addToCart, removeFromCart, updateQuantity, clearCart, isInCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

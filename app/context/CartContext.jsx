@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import useLocalStorageState from '../hooks/useLocalStorageState';
 import { useCountry } from './CountryContext';
 import { trackEvent } from '../lib/fbpixel';
@@ -23,7 +23,9 @@ const lineKeyOf = (item) => item.lineId ?? String(item.id);
 
 export function CartProvider({ children }) {
   const [items, setItems] = useLocalStorageState('Fitoo_cart', []);
+  const [recentlyAdded, setRecentlyAdded] = useState(null);
   const { productsAvailable } = useCountry();
+  const dismissRecentlyAdded = useCallback(() => setRecentlyAdded(null), []);
 
   const addToCart = useCallback(
     (product, quantity = 1, variant = null) => {
@@ -56,6 +58,14 @@ export function CartProvider({ children }) {
           },
         ];
       setItems(next);
+      setRecentlyAdded({
+        id: product.id,
+        name: product.name,
+        image: product.image,
+        price: variant?.price ?? product.discountedPrice ?? product.price,
+        quantity,
+        variantName: variant?.name,
+      });
 
       // Meta Pixel — fires for every successful add, including quantity bumps
       // on a line already in the cart.
@@ -121,13 +131,15 @@ export function CartProvider({ children }) {
       items,
       totalItems,
       totalPrice,
+      recentlyAdded,
+      dismissRecentlyAdded,
       addToCart,
       removeFromCart,
       updateQuantity,
       clearCart,
       isInCart,
     }),
-    [items, totalItems, totalPrice, addToCart, removeFromCart, updateQuantity, clearCart, isInCart]
+    [items, totalItems, totalPrice, recentlyAdded, dismissRecentlyAdded, addToCart, removeFromCart, updateQuantity, clearCart, isInCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

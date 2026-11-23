@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import Link from 'next/link';
 import { H2, H3, Text } from '../atoms/Typography';
 import ImageGallery from '../organisms/ImageGallery';
 import Button from '../atoms/Button';
@@ -246,15 +245,6 @@ export default function ProductTemplate({ id, initialProduct = null }) {
                                 />
                             </Button>
                         </div>
-
-                        {inCart && (
-                            <Link
-                                href="/cart"
-                                className="text-sm text-primary font-medium hover:text-primary-hover transition-colors -mt-2"
-                            >
-                                View cart →
-                            </Link>
-                        )}
 
                         <div className="text-sm text-gray-400 mt-2">
                             {comingSoon ? (

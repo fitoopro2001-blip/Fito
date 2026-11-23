@@ -37,7 +37,7 @@ const SHIPPING_STEPS = [
   {
     icon: 'check-circle',
     title: 'Delivered',
-    description: 'Cash on delivery or prepaid — either way, inspect your order on arrival.',
+    description: 'Your order arrives at your doorstep. Please inspect your package on arrival.',
   },
 ];
 

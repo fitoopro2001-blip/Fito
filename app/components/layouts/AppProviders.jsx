@@ -6,6 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { antTheme } from '@/lib/antTheme';
+import AddToCartPopup from '@/components/organisms/AddToCartPopup';
 
 // All global providers in one place.
 //
@@ -24,6 +25,7 @@ export default function AppProviders({ children }) {
                 <AuthProvider>
                     <CartProvider>
                         <WishlistProvider>{children}</WishlistProvider>
+                        <AddToCartPopup />
                     </CartProvider>
                 </AuthProvider>
             </ConfigProvider>

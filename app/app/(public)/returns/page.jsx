@@ -98,8 +98,8 @@ export default function ReturnsPage() {
             <H4 className="mb-3">Refund timeline</H4>
             <Text muted className="text-sm leading-relaxed">
               Refunds are issued to your original payment method within 5-7 business days of us
-              receiving and inspecting the returned item. Cash-on-delivery orders are refunded via
-              bank transfer.
+              receiving and inspecting the returned item. Refunds for earlier cash-on-delivery
+              orders are processed via bank transfer.
             </Text>
           </div>
 

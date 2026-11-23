@@ -7,7 +7,6 @@ import { message } from 'antd';
 import { H2, H4, Text } from '../../../components/atoms/Typography';
 import Card from '../../../components/atoms/Card';
 import Input from '../../../components/atoms/Input';
-import Radio from '../../../components/atoms/Radio';
 import Upload from '../../../components/atoms/Upload';
 import Button from '../../../components/atoms/Button';
 import Icon from '../../../components/atoms/Icon';
@@ -37,15 +36,14 @@ function buildWhatsAppMessage(order) {
         ]
       : []),
     `Total: PKR ${order.total.toFixed(2)}`,
-    `Payment: ${order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment (Bank Transfer)'}`,
+    'Payment: Online Payment (Bank Transfer)',
     '',
     `Name: ${order.shipping.name}`,
     `Phone: ${order.shipping.phone}`,
     `Address: ${order.shipping.address}, ${order.shipping.city}`,
+    '',
+    '(Payment screenshot attached in this chat)',
   ];
-  if (order.paymentMethod === 'online') {
-    lines.push('', '(Payment screenshot attached in this chat)');
-  }
   return lines.join('\n');
 }
 
@@ -54,7 +52,7 @@ export default function CheckoutPage() {
   const { productsAvailable } = useCountry();
 
   const [shipping, setShipping] = useState({ name: '', email: '', phone: '', address: '', city: '' });
-  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const paymentMethod = 'online';
   const [transactionId, setTransactionId] = useState('');
   const [screenshot, setScreenshot] = useState([]);
   const [error, setError] = useState('');
@@ -218,10 +216,7 @@ export default function CheckoutPage() {
           </div>
           <H2>Order Placed!</H2>
           <Text muted className="mt-2">
-            Order #{order.orderNumber || order.id} —{' '}
-            {order.paymentMethod === 'cod'
-              ? 'pay on delivery.'
-              : "we'll confirm once payment is verified."}
+            Order #{order.orderNumber || order.id} — we&apos;ll confirm once payment is verified.
           </Text>
 
           <Text muted className="mt-3 text-sm">
@@ -233,13 +228,11 @@ export default function CheckoutPage() {
             {order.shipping.email && ' We’ve also emailed your confirmation to ' + order.shipping.email + '.'}
           </Text>
 
-          {order.paymentMethod === 'online' && (
-            <Text muted className="mt-3 text-sm">
-              A wa.me link can&apos;t carry a file attachment — tap below to open WhatsApp with
-              your order details pre-filled, then attach the payment screenshot yourself in that
-              chat.
-            </Text>
-          )}
+          <Text muted className="mt-3 text-sm">
+            A wa.me link can&apos;t carry a file attachment — tap below to open WhatsApp with
+            your order details pre-filled, then attach the payment screenshot yourself in that
+            chat.
+          </Text>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
             <Button
@@ -327,71 +320,66 @@ export default function CheckoutPage() {
 
             <Card className="bg-surface border border-border">
               <H4 className="mb-4">Payment Method</H4>
-              <Radio.Group
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="flex-col gap-3"
-              >
-                <Radio value="cod">Cash on Delivery</Radio>
-                <Radio value="online">Online Payment (Bank Transfer)</Radio>
-              </Radio.Group>
+              <Text className="font-medium text-text">Online Payment (Bank Transfer)</Text>
+              <Text muted className="mt-2 text-sm">
+                Cash on delivery is temporarily unavailable. Please pay by bank transfer and share
+                your payment details with the order.
+              </Text>
             </Card>
 
-            {paymentMethod === 'online' && (
-              <Card className="bg-surface border border-border">
-                <H4 className="mb-3">Bank Details</H4>
-                <div className="space-y-3 mb-5">
-                  <div>
-                    <Text muted>Bank Name</Text>
-                    <div className="text-text font-medium">Bank Alfalah</div>
-                  </div>
-                  <div>
-                    <Text muted>Account Title</Text>
-                    <div className="text-text font-medium">FITOO</div>
-                  </div>
-                  <div>
-                    <Text muted>Account Number</Text>
-                    <div className="text-text font-medium">55215002851811</div>
-                  </div>
-                  <div>
-                    <Text muted>IBAN</Text>
-                    <div className="text-text font-medium">PK73ALFH5521005002851811</div>
-                  </div>
-                </div>
-
-                <div className="mb-5">
-                  <label className="block text-sm text-text-secondary mb-1.5">
-                    Transaction ID (Optional)
-                  </label>
-                  <Input
-                    placeholder="Enter transaction reference"
-                    value={transactionId}
-                    onChange={(e) => setTransactionId(e.target.value)}
-                  />
-                </div>
-
+            <Card className="bg-surface border border-border">
+              <H4 className="mb-3">Bank Details</H4>
+              <div className="space-y-3 mb-5">
                 <div>
-                  <label className="block text-sm text-text-secondary mb-1.5">
-                    Payment Screenshot
-                  </label>
-                  <Upload
-                    value={screenshot}
-                    onChange={setScreenshot}
-                    picture
-                    accept="image/*"
-                    allowedTypes={ALLOWED_IMAGE_TYPES}
-                    maxSizeMB={MAX_UPLOAD_SIZE_MB}
-                  >
-                    <UploadOutlined />
-                    <span className="ml-2">Upload Screenshot</span>
-                  </Upload>
-                  <Text muted className="text-xs mt-2">
-                    Kept with your order for reference. You&apos;ll also get a WhatsApp link after
-                    placing the order — attach it there too so we can verify faster.
-                  </Text>
+                  <Text muted>Bank Name</Text>
+                  <div className="text-text font-medium">Bank Alfalah</div>
                 </div>
-              </Card>
-            )}
+                <div>
+                  <Text muted>Account Title</Text>
+                  <div className="text-text font-medium">FITOO</div>
+                </div>
+                <div>
+                  <Text muted>Account Number</Text>
+                  <div className="text-text font-medium">55215002851811</div>
+                </div>
+                <div>
+                  <Text muted>IBAN</Text>
+                  <div className="text-text font-medium">PK73ALFH5521005002851811</div>
+                </div>
+              </div>
+
+              <div className="mb-5">
+                <label className="block text-sm text-text-secondary mb-1.5">
+                  Transaction ID (Optional)
+                </label>
+                <Input
+                  placeholder="Enter transaction reference"
+                  value={transactionId}
+                  onChange={(e) => setTransactionId(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-text-secondary mb-1.5">
+                  Payment Screenshot
+                </label>
+                <Upload
+                  value={screenshot}
+                  onChange={setScreenshot}
+                  picture
+                  accept="image/*"
+                  allowedTypes={ALLOWED_IMAGE_TYPES}
+                  maxSizeMB={MAX_UPLOAD_SIZE_MB}
+                >
+                  <UploadOutlined />
+                  <span className="ml-2">Upload Screenshot</span>
+                </Upload>
+                <Text muted className="text-xs mt-2">
+                  Kept with your order for reference. You&apos;ll also get a WhatsApp link after
+                  placing the order — attach it there too so we can verify faster.
+                </Text>
+              </div>
+            </Card>
 
             {error && <Text className="text-danger text-sm">{error}</Text>}
           </div>

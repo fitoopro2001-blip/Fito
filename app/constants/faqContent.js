@@ -89,7 +89,7 @@ export const FAQ_CATEGORIES = [
         questions: [
             {
                 question: 'What payment methods do you accept?',
-                answer: 'We accept cash on delivery (COD) and online bank transfer/payment.',
+                answer: 'We currently accept online bank transfer only. Cash on delivery is temporarily unavailable.',
             },
             {
                 question: 'Do I need an account to place an order?',
